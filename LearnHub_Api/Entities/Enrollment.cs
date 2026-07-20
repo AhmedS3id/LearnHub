@@ -2,6 +2,7 @@
 {
     public class Enrollment
     {
+        public int Id { get; set; }
         public string StudentId { get; set; }=string.Empty;
         public int CourseId { get; set; }
         public int Progress { get; set; }

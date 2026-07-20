@@ -10,6 +10,7 @@
         public string InstructorId { get; set; } = string.Empty;
 
         public Category Category { get; set; } = null!;
+        public ApplicationUser Instructor { get; set; } = null!;
         public ICollection<Lesson> Lessons { get; set; } = [];
         
     }
