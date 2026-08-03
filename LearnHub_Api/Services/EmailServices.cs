@@ -1,12 +1,47 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using LearnHub_Api.Settings;
+using MailKit.Security;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using MimeKit;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace LearnHub_Api.Services
 {
-    public class EmailServices : IEmailSender
+    public class EmailServices(IOptions<MailSettings> mailSetting, ILogger<EmailServices> logger) : IEmailSender
     {
-        public Task SendEmailAsync(string email, string subject, string htmlMessage)
+        private readonly MailSettings _mailSetting = mailSetting.Value;
+        private readonly ILogger<EmailServices> _logger = logger;
+
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            throw new NotImplementedException();
+            var message = new MimeMessage
+            {
+                Sender = MailboxAddress.Parse(_mailSetting.Mail),
+                Subject = subject
+            };
+            message.To.Add(MailboxAddress.Parse(email));
+            var builder = new BodyBuilder
+            {
+                HtmlBody = htmlMessage
+            };
+
+            message.Body = builder.ToMessageBody();
+
+            //using packag mailkit
+            using var smtp = new SmtpClient();
+
+
+            // ✅ تعديل 1 — تجاهل الـ SSL Certificate
+            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+            // ✅ تعديل 2 — تغيير StartTls لـ StartTlsWhenAvailable
+            await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable);
+            _logger.LogInformation("Sending email to :{email}", email);
+            //  دى لازم على ال production
+            //   smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_mailSetting.Mail, _mailSetting.Password);
+            await smtp.SendAsync(message);
+            smtp.Disconnect(true);
         }
     }
 }
