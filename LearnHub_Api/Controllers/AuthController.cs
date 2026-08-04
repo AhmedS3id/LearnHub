@@ -25,6 +25,18 @@ namespace LearnHub_Api.Controllers
                 : result.ToProblem();
         }
 
+        [HttpPost("")]
+        public async Task<IActionResult> Login(
+           [FromBody] LoginRequest request,
+            CancellationToken cancellationToken)
+        {
+            var result = await _authServices.LoginAsync(request, cancellationToken);
+
+            return result.IsSuccess
+                ? Ok(result.Value)
+                : result.ToProblem();
+        }
+
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(
             [FromBody] ConfirmEmailRequest request)
