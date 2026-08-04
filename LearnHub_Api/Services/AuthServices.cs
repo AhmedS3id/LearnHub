@@ -1,4 +1,6 @@
 ﻿
+using LearnHub_Api.Authentication;
+using LearnHub_Api.Consts;
 using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
@@ -8,11 +10,13 @@ namespace LearnHub_Api.Services
 {
     public class AuthServices(UserManager<ApplicationUser> UserManager,
         ILogger<AuthServices>logger,
+        IJwtProvider jwtProvider,
         IEmailSender emailSender,
         IHttpContextAccessor httpContextAccessor) : IAuthServices
     {
         private readonly UserManager<ApplicationUser> _UserManager = UserManager;
         private readonly ILogger<AuthServices> _logger = logger;
+        private readonly IJwtProvider _jwtProvider = jwtProvider;
         private readonly IEmailSender _emailSender = emailSender;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -34,6 +38,31 @@ namespace LearnHub_Api.Services
             }
             var error = result.Errors.First();
             return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+        public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
+        {
+            if (await _UserManager.FindByEmailAsync(request.Email) is not { } user)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+
+            if (!user.EmailConfirmed)
+                return Result.Failure<AuthResponse>(UserCredentials.EmailNotConfirmed);
+
+            if (!await _UserManager.CheckPasswordAsync(user, request.Password))
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+
+            var (token, expireIn) = _jwtProvider.GenerateToken(user);
+                //var RefreshToken = GenerateRefreshToken();
+               // var ExpirationDate = DateTime.UtcNow.AddDays(15);
+
+                //user.RefreshTokens.Add(new RefreshTokens
+                //{
+                //    Token = RefreshToken,
+                //    ExpireOn = ExpirationDate
+                //});
+              //  await _UserManager.UpdateAsync(user);
+                var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expireIn);
+                return Result.Success(response);
+
         }
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
@@ -94,6 +123,5 @@ namespace LearnHub_Api.Services
                 });
            await _emailSender.SendEmailAsync(user.Email!, "✅ Learn Hub : Email Confirmation", EmailBody);
         }
-
     }
 }

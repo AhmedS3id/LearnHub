@@ -1,6 +1,11 @@
 ﻿using FluentValidation.AspNetCore;
+using LearnHub_Api.Authentication;
 using LearnHub_Api.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace LearnHub_Api
 {
@@ -22,7 +27,7 @@ namespace LearnHub_Api
             
 
             services.AddMapsterServicesConfig();
-            services.AddAuthConfig();
+            services.AddAuthConfig(configuration);
 
             return services;
         }
@@ -36,8 +41,17 @@ namespace LearnHub_Api
 
             return services;
         }
-        private static IServiceCollection AddAuthConfig(this IServiceCollection services)
+        private static IServiceCollection AddAuthConfig(this IServiceCollection services,IConfiguration configuration)
         {
+            services.AddOptions<JwtOptions>()
+           .BindConfiguration("Jwt")
+           .ValidateDataAnnotations()
+           .ValidateOnStart();
+
+            var JwtSettings = configuration.GetSection("Jwt").Get<JwtOptions>();
+
+            services.AddSingleton<IJwtProvider, JwtProvider>();
+
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequiredLength = 8;
@@ -46,6 +60,25 @@ namespace LearnHub_Api
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            services.AddAuthentication(static option =>
+            {
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.SaveToken = true;
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
+                    ValidIssuer = JwtSettings?.Issuer,
+                    ValidAudience = JwtSettings?.Audience
+                };
+            });
 
             return services;
         }
