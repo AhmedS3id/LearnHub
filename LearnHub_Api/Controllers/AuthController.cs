@@ -47,7 +47,7 @@ namespace LearnHub_Api.Controllers
                 ? Ok(result.Value)
                 : result.ToProblem();
         }
-        [HttpPost("revoke-token")]
+        [HttpPost("logout")]
         public async Task<IActionResult> RevokeRefreshToken(
            [FromBody] RefreshTokenRequest request,
             CancellationToken cancellationToken)
