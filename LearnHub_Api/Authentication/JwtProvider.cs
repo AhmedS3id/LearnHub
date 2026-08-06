@@ -44,8 +44,11 @@ namespace LearnHub_Api.Authentication
                 {
                     IssuerSigningKey = symmetricSecurityKey,
                     ValidateIssuerSigningKey = true,
-                    ValidateAudience = true,
                     ValidateIssuer = true,
+                    ValidIssuer = _options.Issuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = _options.Audience,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
                 var JwtToken = (JwtSecurityToken)validatedToken;

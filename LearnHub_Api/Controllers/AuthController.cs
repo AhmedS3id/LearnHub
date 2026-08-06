@@ -36,6 +36,17 @@ namespace LearnHub_Api.Controllers
                 ? Ok(result.Value)
                 : result.ToProblem();
         }
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken(
+           [FromBody] RefreshTokenRequest request,
+            CancellationToken cancellationToken)
+        {
+            var result = await _authServices.GetRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
+
+            return result.IsSuccess
+                ? Ok(result.Value)
+                : result.ToProblem();
+        }
 
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(

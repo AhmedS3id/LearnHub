@@ -1,6 +1,7 @@
 ﻿
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Consts;
+using LearnHub_Api.Entities;
 using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
@@ -68,6 +69,39 @@ namespace LearnHub_Api.Services
             await _UserManager.UpdateAsync(user);
             var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expireIn,refreshToken,RFExpirationDate);
                 return Result.Success(response);
+        }
+        public async Task<Result<AuthResponse>> GetRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken)
+        {
+            var userId = _jwtProvider.ValidateToken(Token);
+            if (userId is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+
+            var user = await _UserManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+
+            var userRefreshToken = user.RefreshTokens
+                .SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
+
+            if (userRefreshToken is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidRefreshToken);
+
+            userRefreshToken.RevokedOn = DateTime.UtcNow;
+
+            var (newToken, expireIn) = _jwtProvider.GenerateToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+            var expirationDate = DateTime.UtcNow.AddDays(15);
+
+            user.RefreshTokens.Add(new RefreshToken
+            {
+                Token = newRefreshToken,
+                ExpireOn = expirationDate
+            });
+            await _UserManager.UpdateAsync(user);
+            var result = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, newToken, expireIn, newRefreshToken, expirationDate);
+            return Result.Success(result);
+
         }
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
