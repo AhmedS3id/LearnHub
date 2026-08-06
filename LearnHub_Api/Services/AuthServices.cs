@@ -103,6 +103,27 @@ namespace LearnHub_Api.Services
             return Result.Success(result);
 
         }
+
+        public async Task<Result> RevokeRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken)
+        {
+            var user_Id = _jwtProvider.ValidateToken(Token);
+            if (user_Id is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+
+            var user = await _UserManager.FindByIdAsync(user_Id);
+            if (user is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+
+
+            var userRefreshToken = user.RefreshTokens
+                .SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
+            if (userRefreshToken is null)
+                return Result.Failure<AuthResponse>(UserCredentials.InvalidRefreshToken);
+
+            userRefreshToken.RevokedOn = DateTime.UtcNow;
+            await _UserManager.UpdateAsync(user);
+            return Result.Success();
+        }
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
             if (await _UserManager.FindByIdAsync(request.UserId) is not { } user)
