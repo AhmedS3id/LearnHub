@@ -4,6 +4,7 @@ using LearnHub_Api.Consts;
 using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace LearnHub_Api.Services
@@ -51,18 +52,22 @@ namespace LearnHub_Api.Services
                 return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
 
             var (token, expireIn) = _jwtProvider.GenerateToken(user);
-                //var RefreshToken = GenerateRefreshToken();
-               // var ExpirationDate = DateTime.UtcNow.AddDays(15);
+            var refreshToken = GenerateRefreshToken();
+            var RFExpirationDate = DateTime.UtcNow.AddDays(15);
 
-                //user.RefreshTokens.Add(new RefreshTokens
-                //{
-                //    Token = RefreshToken,
-                //    ExpireOn = ExpirationDate
-                //});
-              //  await _UserManager.UpdateAsync(user);
-                var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expireIn);
+            foreach (var tokens in user.RefreshTokens.Where(t => t.IsActive))
+            {
+                tokens.RevokedOn = DateTime.UtcNow;
+            }
+
+            user.RefreshTokens.Add(new RefreshToken
+            {
+                Token = refreshToken,
+                ExpireOn = RFExpirationDate
+            });
+            await _UserManager.UpdateAsync(user);
+            var response = new AuthResponse(user.Id, user.Email, user.FirstName, user.LastName, token, expireIn,refreshToken,RFExpirationDate);
                 return Result.Success(response);
-
         }
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
@@ -111,6 +116,12 @@ namespace LearnHub_Api.Services
             return Result.Success();
 
         }
+
+        private static string GenerateRefreshToken()
+        {
+             return Convert.ToBase64String (RandomNumberGenerator.GetBytes(64));
+        }
+
         private async Task SendConfirmationEmail(ApplicationUser user, string code)
         {
             var Origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
