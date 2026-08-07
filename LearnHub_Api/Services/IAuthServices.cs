@@ -9,6 +9,8 @@
         Task<Result> ConfirmationEmail(ConfirmEmailRequest request);
         Task<Result> ResendConfirmationEmail(ResendConfirmationEmailRequest request);
         Task<Result> ForgetPasswordAsync(ForgetPasswordRequest request);
+        Task<Result> ResetPasswordAsync(ResetPasswordRequest request);
+
 
     }
 }

@@ -85,5 +85,13 @@ namespace LearnHub_Api.Controllers
             return Result.IsSuccess ? Ok() : Result.ToProblem();
         }
 
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var Result = await _authServices.ResetPasswordAsync(request);
+
+            return Result.IsSuccess ? Ok() : Result.ToProblem();
+        }
+
     }
 }
