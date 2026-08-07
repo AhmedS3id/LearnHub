@@ -3,7 +3,6 @@ using LearnHub_Api.Authentication;
 using LearnHub_Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -24,6 +23,7 @@ namespace LearnHub_Api
 
             services.AddScoped<IAuthServices, AuthServices>();
             services.AddScoped<IEmailSender, EmailServices>();
+            services.AddScoped<IUserService, UserService>();
             
 
             services.AddMapsterServicesConfig();

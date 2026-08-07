@@ -2,6 +2,7 @@
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Consts;
 using LearnHub_Api.Entities;
+using LearnHub_Api.Errors;
 using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
@@ -26,7 +27,7 @@ namespace LearnHub_Api.Services
         {
             var existingUser = await _UserManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
-                return Result.Failure(UserCredentials.DuplicatedEmaiil);
+                return Result.Failure(UserErrors.EmailAlreadyExists);
             var user = request.Adapt<ApplicationUser>();
             var result = await _UserManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
@@ -44,13 +45,13 @@ namespace LearnHub_Api.Services
         public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
         {
             if (await _UserManager.FindByEmailAsync(request.Email) is not { } user)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
             if (!user.EmailConfirmed)
-                return Result.Failure<AuthResponse>(UserCredentials.EmailNotConfirmed);
+                return Result.Failure<AuthResponse>(UserErrors.EmailNotConfirmed);
 
             if (!await _UserManager.CheckPasswordAsync(user, request.Password))
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
             var (token, expireIn) = _jwtProvider.GenerateToken(user);
             var refreshToken = GenerateRefreshToken();
@@ -74,18 +75,18 @@ namespace LearnHub_Api.Services
         {
             var userId = _jwtProvider.ValidateToken(Token);
             if (userId is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
             var user = await _UserManager.FindByIdAsync(userId);
 
             if (user is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
             var userRefreshToken = user.RefreshTokens
                 .SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
 
             if (userRefreshToken is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidRefreshToken);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidRefreshToken);
 
             userRefreshToken.RevokedOn = DateTime.UtcNow;
 
@@ -108,17 +109,17 @@ namespace LearnHub_Api.Services
         {
             var user_Id = _jwtProvider.ValidateToken(Token);
             if (user_Id is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidJwtToken);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 
             var user = await _UserManager.FindByIdAsync(user_Id);
             if (user is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidCredentials);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
 
             var userRefreshToken = user.RefreshTokens
                 .SingleOrDefault(x => x.Token == RefreshToken && x.IsActive);
             if (userRefreshToken is null)
-                return Result.Failure<AuthResponse>(UserCredentials.InvalidRefreshToken);
+                return Result.Failure<AuthResponse>(UserErrors.InvalidRefreshToken);
 
             userRefreshToken.RevokedOn = DateTime.UtcNow;
             await _UserManager.UpdateAsync(user);
@@ -127,10 +128,10 @@ namespace LearnHub_Api.Services
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
             if (await _UserManager.FindByIdAsync(request.UserId) is not { } user)
-                return Result.Failure(UserCredentials.InvalidCode);
+                return Result.Failure(UserErrors.InvalidConfirmationCode);
 
             if (user.EmailConfirmed)
-                return Result.Failure(UserCredentials.DuplicatedConfirmed);
+                return Result.Failure(UserErrors.EmailAlreadyConfirmed);
 
             var code = request.Code;
 
@@ -141,7 +142,7 @@ namespace LearnHub_Api.Services
             }
             catch (FormatException)
             {
-                return Result.Failure(UserCredentials.InvalidCode);
+                return Result.Failure(UserErrors.InvalidConfirmationCode);
             }
 
             var result = await _UserManager.ConfirmEmailAsync(user, code);
@@ -157,10 +158,10 @@ namespace LearnHub_Api.Services
         {
 
             if (await _UserManager.FindByEmailAsync(request.Email) is not { } user)
-                return Result.Failure(UserCredentials.InvalidCode);
+                return Result.Failure(UserErrors.InvalidConfirmationCode);
 
             if (user.EmailConfirmed)
-                return Result.Failure(UserCredentials.DuplicatedConfirmed);
+                return Result.Failure(UserErrors.EmailAlreadyConfirmed);
 
             var code = await _UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
