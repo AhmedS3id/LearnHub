@@ -8,6 +8,7 @@
         Task<Result> RevokeRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken);
         Task<Result> ConfirmationEmail(ConfirmEmailRequest request);
         Task<Result> ResendConfirmationEmail(ResendConfirmationEmailRequest request);
+        Task<Result> ForgetPasswordAsync(ForgetPasswordRequest request);
 
     }
 }

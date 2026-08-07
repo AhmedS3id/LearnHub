@@ -77,6 +77,13 @@ namespace LearnHub_Api.Controllers
 
             return Result.IsSuccess ? Ok() : Result.ToProblem();
         }
+        [HttpPost("forget-password")]
+        public async Task<IActionResult> ForgetPassword([FromBody]ForgetPasswordRequest email)
+        {
+            var Result = await _authServices.ForgetPasswordAsync(email);
+
+            return Result.IsSuccess ? Ok() : Result.ToProblem();
+        }
 
     }
 }

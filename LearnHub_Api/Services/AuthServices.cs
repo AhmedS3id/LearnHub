@@ -125,6 +125,25 @@ namespace LearnHub_Api.Services
             await _UserManager.UpdateAsync(user);
             return Result.Success();
         }
+
+        public async Task<Result> ForgetPasswordAsync(ForgetPasswordRequest request)
+        {
+            var user = await _UserManager.FindByEmailAsync(request.Email);
+            if (user is null)
+                return Result.Success();
+
+            if (!user.EmailConfirmed)
+                return Result.Failure(UserErrors.EmailNotConfirmed);
+
+            var code = await _UserManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            _logger.LogInformation("Confirmation code : {code}", code);
+
+            await SendForgetPasswordEmail(user, code);
+
+            return Result.Success();
+
+        }
         public async Task<Result> ConfirmationEmail(ConfirmEmailRequest request)
         {
             if (await _UserManager.FindByIdAsync(request.UserId) is not { } user)
@@ -178,6 +197,18 @@ namespace LearnHub_Api.Services
              return Convert.ToBase64String (RandomNumberGenerator.GetBytes(64));
         }
 
+        private async Task SendForgetPasswordEmail(ApplicationUser user, string code)
+        {
+            var Origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
+
+            var EmailBody = EmailBodyBuilder.GenerateEmailBody("ForgetPassword", new Dictionary<string, string>
+                {
+                    {"{{name}}",user.FirstName },
+                    { "{{action_url}}", $"{Origin}/auth/forgetPassword?email={user.Email}&code={code}" }
+                }
+            );
+            await _emailSender.SendEmailAsync(user.Email!, "✅ Learn Hub : Change Password ", EmailBody);
+        }
         private async Task SendConfirmationEmail(ApplicationUser user, string code)
         {
             var Origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
