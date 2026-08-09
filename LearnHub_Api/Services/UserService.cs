@@ -29,5 +29,15 @@ namespace LearnHub_Api.Services
             var error=result.Errors.First();
             return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
         }
+        public async Task<Result<UsersProfileResponse>> GetProfileAsync(String Id)
+        {
+
+            var user = await _userManager.Users
+                .Where(x => x.Id == Id)
+                .ProjectToType<UsersProfileResponse>()
+                .FirstAsync();
+
+            return Result.Success(user);
+        }
     }
 }

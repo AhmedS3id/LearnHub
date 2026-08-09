@@ -12,6 +12,15 @@ namespace LearnHub_Api.Controllers
     {
         private readonly IUserService _userService = userService;
 
+        [HttpPut("")]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            var result = await _userService.GetProfileAsync(User.GetUserId()!);
+
+            return result.IsSuccess ? Ok(result.Value): result.ToProblem();
+
+        }
+
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
