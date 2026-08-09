@@ -39,5 +39,17 @@ namespace LearnHub_Api.Services
 
             return Result.Success(user);
         }
+        public async Task<Result> UpdateUserProfileAsync(string Id, UpdateProfileRequest request)
+        {
+            var user = await _userManager.Users
+                .Where(x => x.Id == Id)
+                .ExecuteUpdateAsync(s => s
+                     .SetProperty(u => u.FirstName, request.FirstName)
+                      .SetProperty(u => u.LastName, request.LastName));
+            //user = request.Adapt(user);
+            //await _userManager.UpdateAsync(user!);
+
+            return Result.Success();
+        }
     }
 }

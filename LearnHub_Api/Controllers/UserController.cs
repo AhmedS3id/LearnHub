@@ -29,5 +29,11 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
 
         }
+        [HttpPut("info")]
+        public async Task<IActionResult> UpdateUserProfile( [FromBody] UpdateProfileRequest request)
+        {
+            var result = await _userService.UpdateUserProfileAsync(User.GetUserId()!, request);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }
