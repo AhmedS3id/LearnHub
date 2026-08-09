@@ -1,6 +1,6 @@
 ﻿namespace LearnHub_Api.Entities
 {
-    public class Course
+    public class Course:AuditableEntity
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

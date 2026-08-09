@@ -1,6 +1,6 @@
 ﻿namespace LearnHub_Api.Entities
 {
-    public class Review
+    public class Review : AuditableEntity
     {
         public int Id { get; set; }
         public int Rating { get; set; }
