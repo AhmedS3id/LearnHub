@@ -15,6 +15,16 @@ namespace LearnHub_Api
             var ConnectionString = configuration.GetConnectionString("DefaultConnection") ??
                 throw new InvalidOperationException("ConnectionString'DefaultConnection' Not found");
 
+
+            var AllowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>()!;
+
+            services.AddCors(options => options.AddDefaultPolicy( builder =>
+            builder
+            .WithOrigins(AllowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            ));
+
             services.AddDbContext<ApplicationDbContext>(option => option.UseSqlServer(ConnectionString));
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
 
