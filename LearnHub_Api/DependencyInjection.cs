@@ -35,6 +35,7 @@ namespace LearnHub_Api
             services.AddScoped<IEmailSender, EmailServices>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ICourseService, CourseServices>();
             
 
             services.AddMapsterServicesConfig();
