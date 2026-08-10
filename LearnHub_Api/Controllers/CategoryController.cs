@@ -1,5 +1,4 @@
 ﻿using LearnHub_Api.Contracts.Category;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
