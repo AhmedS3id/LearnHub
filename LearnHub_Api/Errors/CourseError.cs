@@ -15,10 +15,4 @@ public static class CourseErrors
             StatusCodes.Status404NotFound
         );
 
-    public static readonly Error CategoryNotFound =
-        new(
-            "Course.CategoryNotFound",
-            "Category not found.",
-            StatusCodes.Status404NotFound
-        );
 }

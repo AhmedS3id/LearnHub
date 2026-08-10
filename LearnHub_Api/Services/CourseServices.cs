@@ -3,7 +3,7 @@ using LearnHub_Api.Errors;
 using LearnHub_Api.Extensions;
 namespace LearnHub_Api.Services
 {
-    public class CourseServices(ApplicationDbContext context,IHttpContextAccessor httpContextAccessor) : ICourseService
+    public class CourseServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ICourseService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -13,7 +13,7 @@ namespace LearnHub_Api.Services
             var category = await _context.Categories
                .FindAsync([request.CategoryId], cancellationToken);
             if (category is null)
-                return Result.Failure<CourseResponse>(CourseErrors.CategoryNotFound);
+                return Result.Failure<CourseResponse>(CategoryErrors.NotFound);
 
             var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
 
@@ -39,6 +39,21 @@ namespace LearnHub_Api.Services
                 category.Name,
                 instructorName
             );
+
+            return Result.Success(response);
+        }
+
+        public async Task<Result<CourseResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var response = await _context.Courses
+                   .AsNoTracking()
+                   .Where(x => x.Id == id)
+                   .ProjectToType<CourseResponse>()
+                   .SingleOrDefaultAsync(cancellationToken);
+
+            if (response is null)
+                return Result.Failure<CourseResponse>(
+                    CourseErrors.NotFound);
 
             return Result.Success(response);
         }
