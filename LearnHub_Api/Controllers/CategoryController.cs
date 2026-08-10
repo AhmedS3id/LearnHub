@@ -37,7 +37,12 @@ namespace LearnHub_Api.Controllers
             var result = await _categoryService.UpdateAsync(id, request,cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken cancellationToken)
+        {
+            var result = await _categoryService.DeleteAsync(id, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
       
 }

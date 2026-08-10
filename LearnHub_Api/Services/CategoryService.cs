@@ -21,7 +21,6 @@ namespace LearnHub_Api.Services
 
             return Result.Success(category.Adapt<CategoryResponse>());
         }
-
         public async Task<IEnumerable<CategoryResponse>> GetAllAsync(CancellationToken cancellationToken) =>
                  await _context.Categories
                 .AsNoTracking()
@@ -51,6 +50,18 @@ namespace LearnHub_Api.Services
 
             currentCategory.Name = request.Name;
             currentCategory.Description = request.Description;
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken)
+        {
+            var category = await _context.Categories
+              .FindAsync([id], cancellationToken);
+            if (category is null)
+                return Result.Failure<CategoryResponse>(CategoryErrors.NotFound);
+
+             _context.Remove(category);
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
