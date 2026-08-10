@@ -10,21 +10,23 @@ namespace LearnHub_Api.Services
 
         public async Task<Result<CategoryResponse>> CreateAsync(CategoryRequest request, CancellationToken cancellationToken)
         {
-            var isExist = await _context.Categories.AnyAsync(x => x.Name == request.Name, 
+            var isExist = await _context.Categories.AnyAsync(x => x.Name == request.Name,
                 cancellationToken: cancellationToken);
             if (isExist)
                 return Result.Failure<CategoryResponse>(CategoryErrors.AlreadyExists);
-            var category = new Category
-            {
-                Name = request.Name,
-                Description = request.Description,
-            };
-            var result = _context.Categories.Add(category);
+
+            var category = request.Adapt<Category>();
+            await _context.Categories.AddAsync(category, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            var response= result.Adapt<CategoryResponse>();
-            return Result.Success(response);
+            return Result.Success(category.Adapt<CategoryResponse>());
         }
+
+        public async Task<IEnumerable<CategoryResponse>> GetAllAsync(CancellationToken cancellationToken) =>
+                 await _context.Categories
+                .AsNoTracking()
+                .ProjectToType<CategoryResponse>()
+                .ToListAsync(cancellationToken);
 
         public async Task<Result<CategoryResponse>> GetByIdAsync( int id,CancellationToken cancellationToken)
         {
