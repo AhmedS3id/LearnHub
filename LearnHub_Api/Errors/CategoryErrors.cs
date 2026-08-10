@@ -8,4 +8,10 @@ public static class CategoryErrors
             "Category already exists.",
             StatusCodes.Status409Conflict
         );
+    public static readonly Error NotFound =
+    new(
+        "Category.NotFound",
+        "Category not found.",
+        StatusCodes.Status404NotFound
+    );
 }

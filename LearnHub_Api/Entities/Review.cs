@@ -5,8 +5,6 @@
         public int Id { get; set; }
         public int Rating { get; set; }
         public string Comment { get; set; } = string.Empty;
-
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
         public string StudentId {  get; set; }= string.Empty;
         public int CourseId {  get; set; }
 

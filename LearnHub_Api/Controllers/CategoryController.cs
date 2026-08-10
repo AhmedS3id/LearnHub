@@ -17,5 +17,11 @@ namespace LearnHub_Api.Controllers
             var result = await _categoryService.CreateAsync(request, cancellationToken);
             return  result.IsSuccess?Ok(result.Value) : result.ToProblem();
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        {
+            var result = await _categoryService.GetByIdAsync(id, cancellationToken);
+            return  result.IsSuccess?Ok(result.Value) : result.ToProblem();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using LearnHub_Api.Contracts.Category;
 using LearnHub_Api.Errors;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LearnHub_Api.Services
 {
@@ -23,6 +24,15 @@ namespace LearnHub_Api.Services
 
             var response= result.Adapt<CategoryResponse>();
             return Result.Success(response);
+        }
+
+        public async Task<Result<CategoryResponse>> GetByIdAsync( int id,CancellationToken cancellationToken)
+        {
+            var category = await _context.Categories
+                .FindAsync([id, cancellationToken], cancellationToken);
+            return category is not null ? 
+                Result.Success(category.Adapt<CategoryResponse>()):
+                Result.Failure<CategoryResponse>(CategoryErrors.NotFound);
         }
     }
 }
