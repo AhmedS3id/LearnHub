@@ -14,4 +14,10 @@ public static class CategoryErrors
         "Category not found.",
         StatusCodes.Status404NotFound
     );
+    public static readonly Error DuplicatedName =
+     new(
+         "Category.DuplicatedName",
+         "Category name already exists.",
+         StatusCodes.Status409Conflict
+     );
 }

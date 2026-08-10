@@ -26,10 +26,16 @@ namespace LearnHub_Api.Controllers
                 : result.ToProblem();
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById([FromRoute] int id, CancellationToken cancellationToken)
         {
             var result = await _categoryService.GetByIdAsync(id, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _categoryService.UpdateAsync(id, request,cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
     }
