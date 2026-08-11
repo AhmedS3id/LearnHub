@@ -1,6 +1,7 @@
 ﻿using LearnHub_Api.Contracts.Course;
 using LearnHub_Api.Errors;
 using LearnHub_Api.Extensions;
+using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.Xml;
 namespace LearnHub_Api.Services
@@ -51,6 +52,23 @@ namespace LearnHub_Api.Services
             .ProjectToType<CourseResponse>()
             .ToListAsync(cancellationToken);
 
+        public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId,CancellationToken cancellationToken)
+        {
+            var categoryExists = await _context.Categories
+                .AnyAsync(x => x.Id == categoryId, cancellationToken);
+
+            if (!categoryExists)
+                return Result.Failure<IEnumerable<CourseResponse>>(
+                    CategoryErrors.NotFound);
+
+            var courses = await _context.Courses
+                .AsNoTracking()
+                .Where(x => x.CategoryId == categoryId)
+                .ProjectToType<CourseResponse>()
+                .ToListAsync(cancellationToken);
+
+            return Result.Success<IEnumerable<CourseResponse>>(courses);
+        }
         public async Task<Result<CourseResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             var response = await _context.Courses
