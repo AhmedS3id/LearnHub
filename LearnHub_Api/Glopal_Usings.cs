@@ -5,6 +5,7 @@ global using Microsoft.AspNetCore.Identity;
 global using static LearnHub_Api.Errors.UserErrors;
 global using Microsoft.AspNetCore.Authorization;
 global using FluentValidation;
+global using LearnHub_Api.Errors;
 global using LearnHub_Api.Persistence;
 global using LearnHub_Api.Services;
 global using Microsoft.EntityFrameworkCore;

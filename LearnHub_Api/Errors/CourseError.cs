@@ -14,5 +14,11 @@ public static class CourseErrors
             "Instructor Not Found.",
             StatusCodes.Status404NotFound
         );
+    public static readonly Error Unauthorized =
+        new(
+            "Course.Unauthorized",
+            "You are not authorized to modify this course.",
+            StatusCodes.Status403Forbidden
+        );
 
 }

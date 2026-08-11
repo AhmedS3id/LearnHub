@@ -1,9 +1,5 @@
 ﻿using LearnHub_Api.Contracts.Course;
-using LearnHub_Api.Errors;
 using LearnHub_Api.Extensions;
-using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.Xml;
 namespace LearnHub_Api.Services
 {
     public class CourseServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ICourseService
@@ -82,6 +78,35 @@ namespace LearnHub_Api.Services
                     CourseErrors.NotFound);
 
             return Result.Success(response);
+        }
+
+        public async Task<Result> UpdateAsync(int courseId, CourseRequest request, CancellationToken cancellationToken)
+        {
+            var categoryExists = await _context.Categories
+               .AnyAsync(x => x.Id == request.CategoryId, cancellationToken);
+
+            if (!categoryExists)
+                return Result.Failure(CategoryErrors.NotFound);
+
+            var course = await _context.Courses
+               .FindAsync( [courseId], cancellationToken);
+
+            if (course is null)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            if (course.InstructorId != instructorId)
+                return Result.Failure(CourseErrors.Unauthorized);
+
+            course.Title= request.Title;
+            course.Description= request.Description;
+            course.Price= request.Price;
+            course.CategoryId= request.CategoryId;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
         }
     }
 }

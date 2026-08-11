@@ -35,5 +35,12 @@ namespace LearnHub_Api.Controllers
             var result = await _courseService.GetByIdAsync(id, cancellationToken);
             return result.IsSuccess? Ok(result.Value):result.ToProblem();
         }
+        [HttpPut("{courseId}")]
+        public async Task< IActionResult> Update([FromRoute] int courseId ,CourseRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _courseService.UpdateAsync(courseId, request, cancellationToken);
+
+            return result.IsSuccess? Ok():result.ToProblem();
+        }
     }
 }
