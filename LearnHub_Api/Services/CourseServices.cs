@@ -108,5 +108,23 @@ namespace LearnHub_Api.Services
 
             return Result.Success();
         }
+        public async Task<Result> DeleteAsync(int courseId, CancellationToken cancellationToken)
+        {
+            var course = await _context.Courses
+               .FindAsync( [courseId], cancellationToken);
+
+            if (course is null)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            if (course.InstructorId != instructorId)
+                return Result.Failure(CourseErrors.Unauthorized);
+
+             _context.Remove(course); 
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
     }
 }
