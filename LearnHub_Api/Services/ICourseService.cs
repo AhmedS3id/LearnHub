@@ -6,5 +6,6 @@ namespace LearnHub_Api.Services
     {
         Task<Result<CourseResponse>> CreateAsync(CourseRequest request, CancellationToken cancellationToken);
         Task<Result<CourseResponse>> GetByIdAsync(int id, CancellationToken cancellationToken);
+        Task<IEnumerable<CourseResponse>> GetAllAsync( CancellationToken cancellationToken);
     }
 }

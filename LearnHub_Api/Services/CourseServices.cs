@@ -1,6 +1,8 @@
 ﻿using LearnHub_Api.Contracts.Course;
 using LearnHub_Api.Errors;
 using LearnHub_Api.Extensions;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography.Xml;
 namespace LearnHub_Api.Services
 {
     public class CourseServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ICourseService
@@ -42,6 +44,12 @@ namespace LearnHub_Api.Services
 
             return Result.Success(response);
         }
+
+        public async Task<IEnumerable<CourseResponse>> GetAllAsync(CancellationToken cancellationToken)=>
+            await _context.Courses
+            .AsNoTracking()
+            .ProjectToType<CourseResponse>()
+            .ToListAsync(cancellationToken);
 
         public async Task<Result<CourseResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {

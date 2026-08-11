@@ -16,6 +16,12 @@ namespace LearnHub_Api.Controllers
             var result = await _courseService.CreateAsync(request, cancellationToken);
             return result.IsSuccess? CreatedAtAction(nameof (GetById), new { id = result.Value.Id }, result.Value) :result.ToProblem();
         }
+        [HttpGet("")]
+        public async Task<IActionResult> GetAll( CancellationToken cancellationToken)
+        {
+            var result = await _courseService.GetAllAsync( cancellationToken);
+            return Ok(result);
+        }
         [HttpGet("{id}")]
         public async Task< IActionResult> GetById([FromRoute] int id ,CancellationToken cancellationToken)
         {
