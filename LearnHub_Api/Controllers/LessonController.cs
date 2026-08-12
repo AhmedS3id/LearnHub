@@ -14,7 +14,15 @@ namespace LearnHub_Api.Controllers
         public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] LessonRequest request,CancellationToken cancellationToken)
         {
             var result = await _lessonService.CreateAsync(courseId, request,cancellationToken);
-            return result.IsSuccess ? Ok(result) : result.ToProblem();
+            return result.IsSuccess ? CreatedAtAction(nameof(GetById), new { lessonId = result.Value.Id }
+            ,result.Value)
+                : result.ToProblem();
+        }
+        [HttpGet("{lessonId}")]
+        public async Task<IActionResult> GetById([FromRoute] int lessonId,CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.GetByIdAsync(lessonId, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
     }
 }

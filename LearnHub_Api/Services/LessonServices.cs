@@ -1,4 +1,5 @@
 ﻿using LearnHub_Api.Contracts.Lesson;
+using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
 using Microsoft.AspNetCore.Identity;
 
@@ -37,6 +38,22 @@ namespace LearnHub_Api.Services
                 lesson.DurationInMinutes,
                 lesson.Order,
                 course.Title);
+            return Result.Success(response);
+        }
+
+        public async Task<Result<LessonResponse>> GetByIdAsync(int lessonId, CancellationToken cancellationToken)
+        {
+            if (await _context.Courses.FindAsync([lessonId], cancellationToken) is not { } course)
+                return Result.Failure<LessonResponse>(LessonErrors.NotFound);
+            var response = await _context.Lessons
+                .AsNoTracking()
+                .Where(x => x.Id == lessonId)
+                .ProjectToType<LessonResponse>()
+                .SingleOrDefaultAsync( cancellationToken);
+            if (response is null)
+                return Result.Failure<LessonResponse>(
+                    LessonErrors.NotFound);
+
             return Result.Success(response);
         }
     }
