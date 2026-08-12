@@ -2,6 +2,7 @@
 using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
 using Microsoft.AspNetCore.Identity;
+using System.Reflection.Metadata.Ecma335;
 
 namespace LearnHub_Api.Services
 {
@@ -22,6 +23,11 @@ namespace LearnHub_Api.Services
             if (course.InstructorId != instructorId)
                 return Result.Failure<LessonResponse>(LessonErrors.Unauthorized);
 
+            var lessonExists = await _context.Lessons.AnyAsync( x => x.CourseId == courseId 
+            && x.Order == request.Order,cancellationToken);
+            if (lessonExists)
+            return Result.Failure<LessonResponse>(LessonErrors.DuplicatedLesson);
+
             var lesson = request.Adapt<Lesson>();
             lesson.CourseId = courseId;
 
@@ -40,7 +46,11 @@ namespace LearnHub_Api.Services
                 course.Title);
             return Result.Success(response);
         }
-
+        public async Task<IEnumerable<LessonResponse>> GetAllAsync(CancellationToken cancellationToken)=>
+            await _context.Lessons
+                .AsNoTracking()
+                .ProjectToType<LessonResponse>()
+                .ToListAsync(cancellationToken);
         public async Task<Result<LessonResponse>> GetByIdAsync(int lessonId, CancellationToken cancellationToken)
         {
             if (await _context.Courses.FindAsync([lessonId], cancellationToken) is not { } course)

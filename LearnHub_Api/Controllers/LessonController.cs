@@ -18,6 +18,12 @@ namespace LearnHub_Api.Controllers
             ,result.Value)
                 : result.ToProblem();
         }
+        [HttpGet("")]
+        public async Task<IActionResult> GetAllAsync([FromRoute] int lessonId, CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.GetAllAsync( cancellationToken);
+            return Ok(result);
+        }
         [HttpGet("{lessonId}")]
         public async Task<IActionResult> GetById([FromRoute] int lessonId,CancellationToken cancellationToken)
         {

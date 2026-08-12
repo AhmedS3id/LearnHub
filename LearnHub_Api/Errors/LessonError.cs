@@ -9,11 +9,11 @@ public static class LessonErrors
             StatusCodes.Status404NotFound
         );
 
-    public static readonly Error CourseNotFound =
+    public static readonly Error DuplicatedLesson =
         new(
-            "Lesson.CourseNotFound",
-            "Course not found.",
-            StatusCodes.Status404NotFound
+            "Lesson.DuplicatedLesson",
+            "Duplicated Lesson with same order.",
+            StatusCodes.Status409Conflict
         );
 
     public static readonly Error Unauthorized =
