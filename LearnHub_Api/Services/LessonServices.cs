@@ -10,8 +10,6 @@ namespace LearnHub_Api.Services
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-
-        //         if (await _userManager.FindByIdAsync(id) is not { }user)
         public async Task<Result<LessonResponse>> CreateAsync(int courseId,LessonRequest request,CancellationToken cancellationToken)
         {
             // var courseIsExist = await _context.Courses.FindAsync([Id], cancellationToken); 
@@ -79,10 +77,57 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
         }
 
-        //public Task<Result> UpdateAsync(int courseId, LessonRequest request, CancellationToken cancellationToken)
-        //{
-        //    if (await _context.Courses.FindAsync([lessonId], cancellationToken) is not { } course)
-        //        return Result.Failure<LessonResponse>(LessonErrors.NotFound);
-        //}
+        public async Task<Result> UpdateAsync(int courseId,int lessonId, LessonRequest request, CancellationToken cancellationToken)
+        {
+            var lesson = await _context.Lessons.FirstOrDefaultAsync( x => x.Id == lessonId 
+            && x.CourseId == courseId,cancellationToken);
+
+            if (lesson is null)
+                return Result.Failure(LessonErrors.NotFound);
+
+            if (await _context.Courses.FindAsync([courseId], cancellationToken) is not { } course)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+            if (course.InstructorId != instructorId)
+                return Result.Failure(LessonErrors.Unauthorized);
+
+            var orderExists = await _context.Lessons.AnyAsync(
+                x => x.CourseId == lesson.CourseId
+                     && x.Order == request.Order
+                     && x.Id != lessonId, cancellationToken);
+            if (orderExists)
+                return Result.Failure(LessonErrors.DuplicatedOrder);
+
+            lesson.Title = request.Title;
+            lesson.Description = request.Description;
+            lesson.VideoUrl = request.VideoUrl;
+            lesson.DurationInMinutes = request.DurationInMinutes;
+            lesson.Order = request.Order;
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+        public async Task<Result> DeleteAsync(int courseId,int lessonId, CancellationToken cancellationToken)
+        {
+
+            if (await _context.Courses.FindAsync([courseId], cancellationToken) is not { } course)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var lesson = await _context.Lessons.FirstOrDefaultAsync( x => x.Id == lessonId 
+            && x.CourseId == courseId,cancellationToken);
+
+            if (lesson is null)
+                return Result.Failure(LessonErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+            if (course.InstructorId != instructorId)
+                return Result.Failure(LessonErrors.Unauthorized);
+
+            _context.Lessons.Remove(lesson);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
     }
 }

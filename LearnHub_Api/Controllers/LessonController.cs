@@ -6,6 +6,7 @@ namespace LearnHub_Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class LessonController(ILessonService lessonService) : ControllerBase
     {
         private readonly ILessonService _lessonService = lessonService;
@@ -29,6 +30,18 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _lessonService.GetByIdAsync(lessonId, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
+        public async Task<IActionResult> Update([FromRoute]int courseId,[FromRoute] int lessonId, [FromBody]LessonRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.UpdateAsync(courseId,lessonId, request, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
+        public async Task<IActionResult> Delete([FromRoute]int courseId,[FromRoute] int lessonId,CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.DeleteAsync(courseId,lessonId, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }
 }
