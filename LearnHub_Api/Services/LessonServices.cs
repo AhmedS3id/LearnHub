@@ -26,7 +26,7 @@ namespace LearnHub_Api.Services
             var lessonExists = await _context.Lessons.AnyAsync( x => x.CourseId == courseId 
             && x.Order == request.Order,cancellationToken);
             if (lessonExists)
-            return Result.Failure<LessonResponse>(LessonErrors.DuplicatedLesson);
+            return Result.Failure<LessonResponse>(LessonErrors.DuplicatedOrder);
 
             var lesson = request.Adapt<Lesson>();
             lesson.CourseId = courseId;
@@ -46,25 +46,43 @@ namespace LearnHub_Api.Services
                 course.Title);
             return Result.Success(response);
         }
-        public async Task<IEnumerable<LessonResponse>> GetAllAsync(CancellationToken cancellationToken)=>
-            await _context.Lessons
+        public async Task<Result<IEnumerable<LessonResponse>>> GetAllAsync( int courseId, CancellationToken cancellationToken)
+        {
+            var courseExists = await _context.Courses
+                .AnyAsync(x => x.Id == courseId, cancellationToken);
+
+            if (!courseExists)
+                return Result.Failure<IEnumerable<LessonResponse>>(
+                    CourseErrors.NotFound);
+
+            var response = await _context.Lessons
                 .AsNoTracking()
+                .Where(x => x.CourseId == courseId)
+                .OrderBy(x => x.Order)
                 .ProjectToType<LessonResponse>()
                 .ToListAsync(cancellationToken);
-        public async Task<Result<LessonResponse>> GetByIdAsync(int lessonId, CancellationToken cancellationToken)
+
+            return Result.Success<IEnumerable<LessonResponse>>(response);
+        }
+        public async Task<Result<LessonResponse>> GetByIdAsync(int lessonId,CancellationToken cancellationToken)
         {
-            if (await _context.Courses.FindAsync([lessonId], cancellationToken) is not { } course)
-                return Result.Failure<LessonResponse>(LessonErrors.NotFound);
             var response = await _context.Lessons
                 .AsNoTracking()
                 .Where(x => x.Id == lessonId)
                 .ProjectToType<LessonResponse>()
-                .SingleOrDefaultAsync( cancellationToken);
+                .SingleOrDefaultAsync(cancellationToken);
+
             if (response is null)
                 return Result.Failure<LessonResponse>(
                     LessonErrors.NotFound);
 
             return Result.Success(response);
         }
+
+        //public Task<Result> UpdateAsync(int courseId, LessonRequest request, CancellationToken cancellationToken)
+        //{
+        //    if (await _context.Courses.FindAsync([lessonId], cancellationToken) is not { } course)
+        //        return Result.Failure<LessonResponse>(LessonErrors.NotFound);
+        //}
     }
 }

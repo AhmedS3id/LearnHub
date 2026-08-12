@@ -22,6 +22,7 @@ namespace LearnHub_Api.Persistence.EntitiesConfigurations
                 .WithMany(x=>x.Lessons)
                 .HasForeignKey(x=>x.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

@@ -9,7 +9,7 @@ public static class LessonErrors
             StatusCodes.Status404NotFound
         );
 
-    public static readonly Error DuplicatedLesson =
+    public static readonly Error DuplicatedOrder =
         new(
             "Lesson.DuplicatedLesson",
             "Duplicated Lesson with same order.",
