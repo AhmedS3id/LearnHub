@@ -12,36 +12,35 @@
 //        private readonly ILessonService _lessonService = lessonService;
 
 //        [HttpPost("course/{courseId}")]
-//        public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] LessonRequest request,CancellationToken cancellationToken)
+//        public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] LessonRequest request, CancellationToken cancellationToken)
 //        {
-//            var result = await _lessonService.CreateAsync(courseId, request,cancellationToken);
-//            return result.IsSuccess ? CreatedAtAction(nameof(GetById), new { lessonId = result.Value.Id }
-//            ,result.Value)
-//                : result.ToProblem();
+//            var result = await _lessonService.CreateAsync(courseId, request, cancellationToken);
+//            return result.IsSuccess ? Ok() : result.ToProblem();
 //        }
 //        [HttpGet("course/{courseId}")]
 //        public async Task<IActionResult> GetAllAsync([FromRoute] int courseId, CancellationToken cancellationToken)
 //        {
-//            var result = await _lessonService.GetAllAsync( courseId,cancellationToken);
-//            return result.IsSuccess? Ok(result.Value):result.ToProblem();
-//        }
-//        [HttpGet("{lessonId}")]
-//        public async Task<IActionResult> GetById([FromRoute] int lessonId,CancellationToken cancellationToken)
-//        {
-//            var result = await _lessonService.GetByIdAsync(lessonId, cancellationToken);
+//            var result = await _lessonService.GetCourseContentAsync(courseId, cancellationToken);
 //            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 //        }
-//        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
-//        public async Task<IActionResult> Update([FromRoute]int courseId,[FromRoute] int lessonId, [FromBody]LessonRequest request,CancellationToken cancellationToken)
-//        {
-//            var result = await _lessonService.UpdateAsync(courseId,lessonId, request, cancellationToken);
-//            return result.IsSuccess ? NoContent() : result.ToProblem();
-//        }
-//        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
-//        public async Task<IActionResult> Delete([FromRoute]int courseId,[FromRoute] int lessonId,CancellationToken cancellationToken)
-//        {
-//            var result = await _lessonService.DeleteAsync(courseId,lessonId, cancellationToken);
-//            return result.IsSuccess ? NoContent() : result.ToProblem();
-//        }
+
+////        [HttpGet("{lessonId}")]
+////        public async Task<IActionResult> GetById([FromRoute] int lessonId,CancellationToken cancellationToken)
+////        {
+////            var result = await _lessonService.GetByIdAsync(lessonId, cancellationToken);
+////            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+////        }
+////        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
+////        public async Task<IActionResult> Update([FromRoute]int courseId,[FromRoute] int lessonId, [FromBody]LessonRequest request,CancellationToken cancellationToken)
+////        {
+////            var result = await _lessonService.UpdateAsync(courseId,lessonId, request, cancellationToken);
+////            return result.IsSuccess ? NoContent() : result.ToProblem();
+////        }
+////        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
+////        public async Task<IActionResult> Delete([FromRoute]int courseId,[FromRoute] int lessonId,CancellationToken cancellationToken)
+////        {
+////            var result = await _lessonService.DeleteAsync(courseId,lessonId, cancellationToken);
+////            return result.IsSuccess ? NoContent() : result.ToProblem();
+////        }
 //    }
 //}

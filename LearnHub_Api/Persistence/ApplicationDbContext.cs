@@ -16,6 +16,7 @@ namespace LearnHub_Api.Persistence
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Section> Sections { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Review> Reviews { get; set; }
