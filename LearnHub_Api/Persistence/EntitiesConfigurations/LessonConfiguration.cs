@@ -18,9 +18,9 @@ namespace LearnHub_Api.Persistence.EntitiesConfigurations
             builder.Property(x => x.VideoUrl)
                 .HasMaxLength(500);
 
-            builder.HasOne(x=>x.Course)
-                .WithMany(x=>x.Lessons)
-                .HasForeignKey(x=>x.CourseId)
+            builder.HasOne(x => x.Section)
+                .WithMany(x => x.Lessons)
+                .HasForeignKey(x => x.SectionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
         }

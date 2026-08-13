@@ -20,20 +20,33 @@ namespace LearnHub_Api.Persistence
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
+        //protected override void OnModelCreating(ModelBuilder builder)
+        //{
+        //    builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        //    var CascadeFk = builder.Model
+        //        .GetEntityTypes()
+        //        .SelectMany(t => t.GetForeignKeys())
+        //        .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
+        //    foreach (var fk in CascadeFk)
+        //        fk.DeleteBehavior = DeleteBehavior.Restrict;
+
+        //    base.OnModelCreating(builder);
+        //}
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-            var CascadeFk = builder.Model
+            var cascadeFk = builder.Model
                 .GetEntityTypes()
                 .SelectMany(t => t.GetForeignKeys())
                 .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
-            foreach (var fk in CascadeFk)
+            foreach (var fk in cascadeFk)
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
+
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             base.OnModelCreating(builder);
         }
-
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             //var CurrentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(JwtRegisteredClaimNames.Sub);

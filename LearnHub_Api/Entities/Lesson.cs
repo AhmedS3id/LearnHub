@@ -8,7 +8,7 @@
         public string VideoUrl { get; set; } = string.Empty; 
         public int DurationInMinutes { get; set; }
         public int Order { get; set; }
-        public int CourseId { get; set; }
-        public Course Course { get; set; } = null!;
+        public int SectionId { get; set; }
+        public Section Section { get; set; } = null!;
     }
 }

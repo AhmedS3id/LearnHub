@@ -16,7 +16,8 @@ namespace LearnHub_Api.Mapping
                .Map(des => des.InstructorName, src => src.Instructor.FirstName + " " + src.Instructor.LastName);
 
             config.NewConfig<Lesson, LessonResponse>()
-               .Map(des => des.CourseTitle, src => src.Course.Title);  
+               .Map(des => des.SectionTitle, src => src.Section.Title)
+               .Map(des => des.CourseTitle, src => src.Section.Course.Title);
         }
     }
 }
