@@ -5,7 +5,5 @@ public record LessonResponse(
     string Description,
     string VideoUrl,
     int DurationInMinutes,
-    int Order,
-    string SectionTitle,
-    string CourseTitle
+    int Order
 );
