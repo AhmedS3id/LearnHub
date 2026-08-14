@@ -1,4 +1,5 @@
 ﻿using LearnHub_Api.Contracts.Lesson;
+using LearnHub_Api.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,16 +16,18 @@ namespace LearnHub_Api.Controllers
         public async Task<IActionResult> Create([FromRoute] int sectionId, [FromBody] LessonRequest request, CancellationToken cancellationToken)
         {
             var result = await _lessonService.CreateAsync(sectionId, request, cancellationToken);
+            return result.IsSuccess ? CreatedAtAction(nameof(GetById),
+                new { sectionId, lessonId = result.Value.Id },result.Value)
+                : result.ToProblem();
+        }
+
+
+        [HttpGet("course/{courseId}")]
+        public async Task<IActionResult> GetCourseContent([FromRoute] int courseId, CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.GetCourseContentAsync(courseId, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-    
-
-//        [HttpGet("course/{courseId}")]
-//        public async Task<IActionResult> GetAllAsync([FromRoute] int courseId, CancellationToken cancellationToken)
-//        {
-//            var result = await _lessonService.GetCourseContentAsync(courseId, cancellationToken);
-//            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-//        }
 
         [HttpGet("section/{sectionId}/lesson/{lessonId}")]
         public async Task<IActionResult> GetById([FromRoute] int sectionId, [FromRoute] int lessonId, CancellationToken cancellationToken)
