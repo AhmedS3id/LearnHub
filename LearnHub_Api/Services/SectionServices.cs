@@ -48,9 +48,9 @@ namespace LearnHub_Api.Services
 
         public async Task<Result<IEnumerable<SectionResponse>>> GetAllAsync(int courseId, CancellationToken cancellationToken)
         {
-            var course = await _context.Courses
+            var courseExists = await _context.Courses
               .AnyAsync(x => x.Id == courseId, cancellationToken);
-            if (!course )
+            if (!courseExists )
                 return Result.Failure<IEnumerable<SectionResponse>>(CourseErrors.NotFound);
 
             var response = await _context.Sections
@@ -61,6 +61,25 @@ namespace LearnHub_Api.Services
                 .ToListAsync(cancellationToken);
 
             return Result.Success<IEnumerable<SectionResponse>>(response);
+        }
+
+        public async Task<Result<SectionResponse>> GetByIdAsync(int courseId, int sectionId, CancellationToken cancellationToken)
+        {
+            var courseExists = await _context.Courses
+                .AnyAsync(x => x.Id == courseId, cancellationToken);
+            if (!courseExists)
+                return Result.Failure<SectionResponse>(CourseErrors.NotFound);
+
+            var response = await _context.Sections
+                .AsNoTracking()
+                .Where(x => x.CourseId == courseId && x.Id == sectionId)
+                .ProjectToType<SectionResponse>()
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (response is null)
+                return Result.Failure<SectionResponse>(SectionErrors.NotFound);
+
+            return Result.Success(response);
         }
     }
 }

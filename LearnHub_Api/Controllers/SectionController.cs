@@ -23,5 +23,11 @@ namespace LearnHub_Api.Controllers
             var result = await _sectionService.GetAllAsync(courseId,cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+        [HttpGet("course/{courseId}/section/{sectionId}")]
+        public async Task<IActionResult> GetById([FromRoute] int courseId, [FromRoute] int sectionId, CancellationToken cancellationToken)
+        {
+            var result = await _sectionService.GetByIdAsync(courseId, sectionId, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
     }
 }
