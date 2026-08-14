@@ -17,7 +17,7 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _lessonService.CreateAsync(sectionId, request, cancellationToken);
             return result.IsSuccess ? CreatedAtAction(nameof(GetById),
-                new { sectionId, lessonId = result.Value.Id },result.Value)
+                new { sectionId, lessonId = result.Value.Id }, result.Value)
                 : result.ToProblem();
         }
 
@@ -32,17 +32,19 @@ namespace LearnHub_Api.Controllers
         [HttpGet("section/{sectionId}/lesson/{lessonId}")]
         public async Task<IActionResult> GetById([FromRoute] int sectionId, [FromRoute] int lessonId, CancellationToken cancellationToken)
         {
-            var result = await _lessonService.GetByIdAsync(sectionId,lessonId, cancellationToken);
+            var result = await _lessonService.GetByIdAsync(sectionId, lessonId, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-    } 
+
+
+        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
+        public async Task<IActionResult> Update([FromRoute] int courseId, [FromRoute] int lessonId, [FromBody] LessonRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.UpdateAsync(courseId, lessonId, request, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+    }
 }
-////        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
-////        public async Task<IActionResult> Update([FromRoute]int courseId,[FromRoute] int lessonId, [FromBody]LessonRequest request,CancellationToken cancellationToken)
-////        {
-////            var result = await _lessonService.UpdateAsync(courseId,lessonId, request, cancellationToken);
-////            return result.IsSuccess ? NoContent() : result.ToProblem();
-////        }
 ////        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
 ////        public async Task<IActionResult> Delete([FromRoute]int courseId,[FromRoute] int lessonId,CancellationToken cancellationToken)
 ////        {

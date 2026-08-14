@@ -99,37 +99,53 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
         }
 
-        //public async Task<Result> UpdateAsync(int courseId, int lessonId, LessonRequest request, CancellationToken cancellationToken)
-        //{
-        //    var lesson = await _context.Lessons.FirstOrDefaultAsync(x => x.Id == lessonId
-        //    && x.CourseId == courseId, cancellationToken);
+        public async Task<Result> UpdateAsync(int sectionId, int lessonId, LessonRequest request, CancellationToken cancellationToken)
+        {
+            //var lesson = await _context.Lessons
+            //  .Include(x => x.Section)
+            //  .ThenInclude(x => x.Course)
+            //  .FirstOrDefaultAsync(
+            //      x => x.Id == lessonId &&
+            //           x.SectionId == sectionId,
+            //      cancellationToken);
+            //var lesson = await _context.Lessons
+            //    .Include(x=>x.Section)
+            //    .FirstOrDefaultAsync(x => x.Id == lessonId
+            //    && x.SectionId == sectionId, cancellationToken);
 
-        //    if (lesson is null)
-        //        return Result.Failure(LessonErrors.NotFound);
+            var result = await _context.Lessons
+                .Where(x => x.Id == lessonId && x.SectionId == sectionId)
+                .Select(x => new
+                {
+                    Lesson = x,
+                    InstructorId = x.Section.Course.InstructorId
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
-        //    if (await _context.Courses.FindAsync([courseId], cancellationToken) is not { } course)
-        //        return Result.Failure(CourseErrors.NotFound);
+            if (result is null)
+                return Result.Failure(LessonErrors.NotFound);
 
-        //    var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
-        //    if (course.InstructorId != instructorId)
-        //        return Result.Failure(LessonErrors.Unauthorized);
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+            if (result.InstructorId != instructorId)
+                return Result.Failure(LessonErrors.Unauthorized);
 
-        //    var orderExists = await _context.Lessons.AnyAsync(
-        //        x => x.CourseId == lesson.CourseId
-        //             && x.Order == request.Order
-        //             && x.Id != lessonId, cancellationToken);
-        //    if (orderExists)
-        //        return Result.Failure(LessonErrors.DuplicatedOrder);
+            var orderExists = await _context.Lessons.AnyAsync(
+                x => x.SectionId == sectionId
+                     && x.Order == request.Order
+                     && x.Id != lessonId, cancellationToken);
+            if (orderExists)
+                return Result.Failure(LessonErrors.DuplicatedOrder);
 
-        //    lesson.Title = request.Title;
-        //    lesson.Description = request.Description;
-        //    lesson.VideoUrl = request.VideoUrl;
-        //    lesson.DurationInMinutes = request.DurationInMinutes;
-        //    lesson.Order = request.Order;
+            var lesson = result.Lesson;
+            lesson.Title = request.Title;
+            lesson.Description = request.Description;
+            lesson.VideoUrl = request.VideoUrl;
+            lesson.DurationInMinutes = request.DurationInMinutes;
+            lesson.Order = request.Order;
 
-        //    await _context.SaveChangesAsync(cancellationToken);
-        //    return Result.Success();
-        //}
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
         //public async Task<Result> DeleteAsync(int courseId, int lessonId, CancellationToken cancellationToken)
         //{
 
