@@ -154,7 +154,7 @@ namespace LearnHub_Api.Services
               .Select(x => new
               {
                   Lesson = x,
-                  InstructorId = x.Section.Course.InstructorId
+                  x.Section.Course.InstructorId
               })
               .FirstOrDefaultAsync(cancellationToken);
 
