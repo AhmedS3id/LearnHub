@@ -17,8 +17,8 @@ namespace LearnHub_Api.Controllers
             var result = await _lessonService.CreateAsync(sectionId, request, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-    }
-}
+    
+
 //        [HttpGet("course/{courseId}")]
 //        public async Task<IActionResult> GetAllAsync([FromRoute] int courseId, CancellationToken cancellationToken)
 //        {
@@ -26,12 +26,14 @@ namespace LearnHub_Api.Controllers
 //            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 //        }
 
-////        [HttpGet("{lessonId}")]
-////        public async Task<IActionResult> GetById([FromRoute] int lessonId,CancellationToken cancellationToken)
-////        {
-////            var result = await _lessonService.GetByIdAsync(lessonId, cancellationToken);
-////            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-////        }
+        [HttpGet("section/{sectionId}/lesson/{lessonId}")]
+        public async Task<IActionResult> GetById([FromRoute] int sectionId, [FromRoute] int lessonId, CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.GetByIdAsync(sectionId,lessonId, cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+    } 
+}
 ////        [HttpPut("course/{courseId}/lessonId/{lessonId}")]
 ////        public async Task<IActionResult> Update([FromRoute]int courseId,[FromRoute] int lessonId, [FromBody]LessonRequest request,CancellationToken cancellationToken)
 ////        {
