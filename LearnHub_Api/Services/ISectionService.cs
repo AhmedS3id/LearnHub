@@ -8,5 +8,6 @@ namespace LearnHub_Api.Services
         Task<Result<IEnumerable<SectionResponse>>> GetAllAsync(int courseId, CancellationToken cancellationToken);
         Task<Result<SectionResponse>> GetByIdAsync(int courseId,int sectionId, CancellationToken cancellationToken);
         Task<Result> UpdateAsync(int courseId,int sectionId,SectionRequest request, CancellationToken cancellationToken);
+        Task<Result> DeleteAsync(int courseId,int sectionId, CancellationToken cancellationToken);
     }
 }

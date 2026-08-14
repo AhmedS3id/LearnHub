@@ -44,7 +44,6 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
 
         }
-
         public async Task<Result<IEnumerable<SectionResponse>>> GetAllAsync(int courseId, CancellationToken cancellationToken)
         {
             var courseExists = await _context.Courses
@@ -118,5 +117,31 @@ namespace LearnHub_Api.Services
 
             return Result.Success();
         }
+        public async Task<Result> DeleteAsync(int courseId, int sectionId, CancellationToken cancellationToken)
+        {
+            var course = await _context.Courses
+              .FindAsync([courseId], cancellationToken);
+            if (course is null)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!
+                .User
+                .GetUserId();
+
+            if (course.InstructorId != instructorId)
+                return Result.Failure(
+                    SectionErrors.Unauthorized);
+
+            var section = await _context.Sections
+                .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
+            if (section is null)
+                return Result.Failure(SectionErrors.NotFound);
+
+            _context.Remove(section);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
     }
 }
