@@ -15,7 +15,10 @@ namespace LearnHub_Api.Controllers
         public async Task<IActionResult> Create([FromRoute] int courseId ,SectionRequest request,CancellationToken cancellationToken)
         {
             var result = await _sectionService.CreateAsync(courseId,request,cancellationToken);
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+            return result.IsSuccess? CreatedAtAction(nameof(GetById),
+                new { courseId, sectionId = result.Value.Id },
+                            result.Value)
+                        : result.ToProblem();
         }
         [HttpGet("course/{courseId}")]
         public async Task<IActionResult> GetAll([FromRoute] int courseId ,CancellationToken cancellationToken)
@@ -28,6 +31,12 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _sectionService.GetByIdAsync(courseId, sectionId, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPut("course/{courseId}/section/{sectionId}")]
+        public async Task<IActionResult> Update([FromRoute] int courseId, [FromRoute] int sectionId,SectionRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _sectionService.UpdateAsync(courseId, sectionId,request, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }
 }

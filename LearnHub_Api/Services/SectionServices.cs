@@ -1,4 +1,5 @@
 ﻿using LearnHub_Api.Contracts.Section;
+using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,11 +27,9 @@ namespace LearnHub_Api.Services
 
             var sectionOrderExists = await _context.Sections
                 .AnyAsync(x =>x.CourseId == courseId
-                && x.Order==request.Order,
-                cancellationToken);
+                && x.Order==request.Order, cancellationToken);
             if (sectionOrderExists)
-                return Result.Failure<SectionResponse>(
-                    SectionErrors.DuplicatedOrder);
+                return Result.Failure<SectionResponse>(SectionErrors.DuplicatedOrder);
 
             var section = request.Adapt<Section>();
             section.CourseId = courseId;
@@ -80,6 +79,44 @@ namespace LearnHub_Api.Services
                 return Result.Failure<SectionResponse>(SectionErrors.NotFound);
 
             return Result.Success(response);
+        }
+
+        public async Task<Result> UpdateAsync(int courseId, int sectionId, SectionRequest request, CancellationToken cancellationToken)
+        {
+    //        var section = await _context.Sections
+    //          .Include(x => x.Course)
+    //          .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
+    //        if (section is null)
+    //            return Result.Failure(SectionErrors.NotFound);
+
+            var course = await _context.Courses
+                .FindAsync([courseId], cancellationToken);
+            if (course is null)
+                return Result.Failure(CourseErrors.NotFound);
+
+            var instructorId = _httpContextAccessor.HttpContext!
+                .User
+                .GetUserId();
+            if (course.InstructorId != instructorId)
+                return Result.Failure(SectionErrors.Unauthorized);
+
+            var section = await _context.Sections
+                .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
+            if (section is null)
+                return Result.Failure(SectionErrors.NotFound);
+
+            var sectionOrderExists = await _context.Sections
+                .AnyAsync(x => x.CourseId == courseId
+                    && x.Order == request.Order
+                    && x.Id != section.Id, cancellationToken);
+            if (sectionOrderExists)
+                return Result.Failure(SectionErrors.DuplicatedOrder);
+
+            section.Title = request.Title;
+            section.Order = request.Order;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
         }
     }
 }
