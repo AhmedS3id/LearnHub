@@ -146,26 +146,29 @@ namespace LearnHub_Api.Services
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
-        //public async Task<Result> DeleteAsync(int courseId, int lessonId, CancellationToken cancellationToken)
-        //{
+        public async Task<Result> DeleteAsync(int sectionId, int lessonId, CancellationToken cancellationToken)
+        {
 
-        //    if (await _context.Courses.FindAsync([courseId], cancellationToken) is not { } course)
-        //        return Result.Failure(CourseErrors.NotFound);
+            var result = await _context.Lessons
+              .Where(x => x.Id == lessonId && x.SectionId == sectionId)
+              .Select(x => new
+              {
+                  Lesson = x,
+                  InstructorId = x.Section.Course.InstructorId
+              })
+              .FirstOrDefaultAsync(cancellationToken);
 
-        //    var lesson = await _context.Lessons.FirstOrDefaultAsync(x => x.Id == lessonId
-        //    && x.CourseId == courseId, cancellationToken);
+            if (result is null)
+                return Result.Failure(LessonErrors.NotFound);
 
-        //    if (lesson is null)
-        //        return Result.Failure(LessonErrors.NotFound);
+            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
+            if (result.InstructorId != instructorId)
+                return Result.Failure(LessonErrors.Unauthorized);
 
-        //    var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
-        //    if (course.InstructorId != instructorId)
-        //        return Result.Failure(LessonErrors.Unauthorized);
+            _context.Lessons.Remove(result.Lesson);
+            await _context.SaveChangesAsync(cancellationToken);
 
-        //    _context.Lessons.Remove(lesson);
-        //    await _context.SaveChangesAsync(cancellationToken);
-
-        //    return Result.Success();
-        //}
+            return Result.Success();
+        }
     }
 }

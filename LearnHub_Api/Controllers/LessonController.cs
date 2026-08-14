@@ -43,13 +43,13 @@ namespace LearnHub_Api.Controllers
             var result = await _lessonService.UpdateAsync(courseId, lessonId, request, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
+
+
+        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
+        public async Task<IActionResult> Delete([FromRoute] int courseId, [FromRoute] int lessonId, CancellationToken cancellationToken)
+        {
+            var result = await _lessonService.DeleteAsync(courseId, lessonId, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }
-////        [HttpDelete("course/{courseId}/lessonId/{lessonId}")]
-////        public async Task<IActionResult> Delete([FromRoute]int courseId,[FromRoute] int lessonId,CancellationToken cancellationToken)
-////        {
-////            var result = await _lessonService.DeleteAsync(courseId,lessonId, cancellationToken);
-////            return result.IsSuccess ? NoContent() : result.ToProblem();
-////        }
-//    }
-//}
