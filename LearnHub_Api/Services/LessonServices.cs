@@ -11,57 +11,50 @@ namespace LearnHub_Api.Services
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-        ////public async Task<Result<LessonResponse>> CreateAsync(int sectionId, LessonRequest request, CancellationToken cancellationToken)
-        ////{
-        ////    var section = await _context.Sections
-        ////        .Include(x => x.Course)
-        ////        .FirstOrDefaultAsync(
-        ////            x => x.Id == sectionId,
-        ////            cancellationToken);
+        public async Task<Result<LessonResponse>> CreateAsync(int sectionId, LessonRequest request, CancellationToken cancellationToken)
+        {
+            var section = await _context.Sections
+                .Include(x => x.Course)
+                .FirstOrDefaultAsync(
+                    x => x.Id == sectionId,
+                    cancellationToken);
 
-        ////    if (section is null)
-        ////        return Result.Failure<LessonResponse>(
-        ////            SectionErrors.NotFound);
+            if (section is null)
+                return Result.Failure<LessonResponse>(
+                    SectionErrors.NotFound);
 
-        ////    var instructorId = _httpContextAccessor.HttpContext!
-        ////        .User
-        ////        .GetUserId();
+            var instructorId = _httpContextAccessor.HttpContext!
+                .User
+                .GetUserId();
 
-        ////    if (section.Course.InstructorId != instructorId)
-        ////        return Result.Failure<LessonResponse>(
-        ////            LessonErrors.Unauthorized);
+            if (section.Course.InstructorId != instructorId)
+                return Result.Failure<LessonResponse>(
+                    LessonErrors.Unauthorized);
 
-        ////    var lessonExists = await _context.Lessons
-        ////        .AnyAsync(
-        ////            x => x.SectionId == sectionId &&
-        ////                 x.Order == request.Order,
-        ////            cancellationToken);
+            var lessonExists = await _context.Lessons
+                .AnyAsync(
+                    x => x.SectionId == sectionId &&
+                         x.Order == request.Order,
+                    cancellationToken);
 
-        ////    if (lessonExists)
-        ////        return Result.Failure<LessonResponse>(
-        ////            LessonErrors.DuplicatedOrder);
+            if (lessonExists)
+                return Result.Failure<LessonResponse>(
+                    LessonErrors.DuplicatedOrder);
 
-        ////    var lesson = request.Adapt<Lesson>();
+            var lesson = request.Adapt<Lesson>();
 
-        ////    lesson.SectionId = sectionId;
+            lesson.SectionId = sectionId;
 
-        ////    await _context.Lessons.AddAsync(
-        ////        lesson,
-        ////        cancellationToken);
+            await _context.Lessons.AddAsync(
+                lesson,
+                cancellationToken);
 
-        ////    await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
 
-        ////    var response = new LessonResponse(
-        ////        lesson.Id,
-        ////        lesson.Title,
-        ////        lesson.Description,
-        ////        lesson.VideoUrl,
-        ////        lesson.DurationInMinutes,
-        ////        lesson.Order
-        ////    );
+            var response = lesson.Adapt<LessonResponse>();
 
-        ////    return Result.Success(response);
-        ////}
+            return Result.Success(response);
+        }
         ////public async Task<Result<IEnumerable<SectionWithLessonsResponse>>> GetCourseContentAsync(int courseId, CancellationToken cancellationToken)
         ////{
         ////    var courseExists = await _context.Courses
