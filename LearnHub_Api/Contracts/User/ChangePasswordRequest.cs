@@ -1,4 +1,4 @@
-﻿namespace LearnHub_Api.Contracts.Users
+﻿namespace LearnHub_Api.Contracts.User
 {
     public record ChangePasswordRequest(
         string CurrentPassword,
