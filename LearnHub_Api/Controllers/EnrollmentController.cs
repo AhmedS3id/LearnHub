@@ -9,7 +9,7 @@ namespace LearnHub_Api.Controllers
     public class EnrollmentController(IEnrollmentService enrollment) : ControllerBase
     {
         private readonly IEnrollmentService _enrollment = enrollment;
-        [HttpPost("{courseId}")]
+        [HttpPost("course/{courseId}")]
         public async Task<IActionResult> Create([FromRoute] int courseId,CancellationToken cancellationToken)
         {
             var result = await _enrollment.CreateAsync(courseId, cancellationToken);
