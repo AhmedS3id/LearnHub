@@ -8,8 +8,8 @@ namespace LearnHub_Api.Services
             int courseId,
             CancellationToken cancellationToken);
 
-        //Task<Result<IEnumerable<EnrollmentResponse>>> GetMyEnrollmentsAsync(
-        //    CancellationToken cancellationToken);
+        Task<Result<IEnumerable<EnrollmentResponse>>> GetMyEnrollmentsAsync(
+            CancellationToken cancellationToken);
 
         //Task<Result<EnrollmentResponse>> GetByIdAsync(
         //    int enrollmentId,

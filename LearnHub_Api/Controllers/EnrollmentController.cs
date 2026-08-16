@@ -13,7 +13,13 @@ namespace LearnHub_Api.Controllers
         public async Task<IActionResult> Create([FromRoute] int courseId,CancellationToken cancellationToken)
         {
             var result = await _enrollment.CreateAsync(courseId, cancellationToken);
-            return result.IsSuccess ? Ok(result) : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpGet("")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await _enrollment.GetMyEnrollmentsAsync( cancellationToken);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
     }
 }

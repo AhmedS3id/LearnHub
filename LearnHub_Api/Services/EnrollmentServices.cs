@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LearnHub_Api.Services
 {
-    public class EnrollmentServices (ApplicationDbContext context,IHttpContextAccessor httpContextAccessor) : IEnrollmentService
+    public class EnrollmentServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : IEnrollmentService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -39,15 +39,31 @@ namespace LearnHub_Api.Services
                 Progress = 0
             };
 
-            await _context.Enrollments.AddAsync(
-                enrollment,
-                cancellationToken);
+            await _context.Enrollments.AddAsync(enrollment, cancellationToken);
 
             await _context.SaveChangesAsync(cancellationToken);
 
             var response = enrollment.Adapt<EnrollmentResponse>();
 
             return Result.Success(response);
+        }
+
+        public async Task<Result<IEnumerable<EnrollmentResponse>>> GetMyEnrollmentsAsync(CancellationToken cancellationToken)
+        {
+            var studentId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            var enrollments = await _context.Enrollments
+                .AsNoTracking()
+                .Where(x => x.StudentId == studentId)
+                .Select(x => new EnrollmentResponse(
+                    x.Id,
+                    x.CourseId,
+                    x.Course.Title,
+                    x.Progress,
+                    x.EnrolledOn
+                )).ToListAsync(cancellationToken);
+
+            return Result.Success<IEnumerable<EnrollmentResponse>>(enrollments);
         }
     }
 }
