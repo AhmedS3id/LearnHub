@@ -11,7 +11,7 @@ namespace LearnHub_Api.Controllers
     {
         private readonly IUserService _userService = userService;
 
-        [HttpPut("")]
+        [HttpGet("")]
         public async Task<IActionResult> GetUserProfile()
         {
             var result = await _userService.GetProfileAsync(User.GetUserId()!);
