@@ -2,6 +2,7 @@
 using LearnHub_Api.Contracts.Section;
 using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
+using System.Collections.Generic;
 
 namespace LearnHub_Api.Services
 {
@@ -12,9 +13,7 @@ namespace LearnHub_Api.Services
 
         public async Task<Result<ReviewResponse>> CreateAsync(int courseId, ReviewRequest request, CancellationToken cancellationToken)
         {
-            var studentId = _httpContextAccessor.HttpContext!
-                .User
-                .GetUserId();
+            var studentId = _httpContextAccessor.HttpContext!.User.GetUserId();
 
             var course = await _context.Courses
                 .Where(x => x.Id == courseId)
@@ -24,10 +23,8 @@ namespace LearnHub_Api.Services
             if (course is null)
                 return Result.Failure<ReviewResponse>(CourseErrors.NotFound);
 
-            var isEnrolled = await _context.Enrollments
-                .AnyAsync(
-                    x => x.CourseId == courseId && x.StudentId == studentId,
-                    cancellationToken);
+            var isEnrolled = await _context.Enrollments.AnyAsync(x => x.CourseId == courseId 
+            && x.StudentId == studentId,cancellationToken);
 
             if (!isEnrolled)
                 return Result.Failure<ReviewResponse>(ReviewErrors.NotEnrolled);
@@ -56,7 +53,7 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
         }
 
-        public async Task<Result<IEnumerable<ReviewResponse>>> GetAllReviewsAsync(int courseId, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<ReviewResponse>>>GetAllReviewsAsync(int courseId, CancellationToken cancellationToken)
         {
             var course = await _context.Courses
                 .Where(x => x.Id == courseId)
@@ -64,7 +61,7 @@ namespace LearnHub_Api.Services
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (course is null)
-                return Result.Failure<IEnumerable<ReviewResponse>>(CourseErrors.NotFound);
+                return Result.Failure <IEnumerable<ReviewResponse>>(CourseErrors.NotFound);
 
             var reviews = await _context.Reviews
                 .AsNoTracking()
@@ -80,6 +77,25 @@ namespace LearnHub_Api.Services
                 .ToListAsync(cancellationToken);
 
             return Result.Success<IEnumerable<ReviewResponse>>(reviews);
+        }
+
+        public async Task<Result> UpdateAsync(int reviewId, ReviewRequest request, CancellationToken cancellationToken)
+        {
+            var studentId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(x => x.Id == reviewId
+                &&x.StudentId == studentId, cancellationToken);
+
+            if (review is null)
+                return Result.Failure(ReviewErrors.NotFound);
+
+            review.Rating = request.Rating;
+            review.Comment = request.Comment;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
         }
     }
 }

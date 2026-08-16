@@ -22,5 +22,11 @@ namespace LearnHub_Api.Controllers
             var result = await _reviewService.GetAllReviewsAsync(courseId,cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+        [HttpPut("{reviewId}")]
+        public async Task<IActionResult> GetAllReviews([FromRoute] int reviewId, [FromBody] ReviewRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _reviewService.UpdateAsync(reviewId, request, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }
