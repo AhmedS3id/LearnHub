@@ -39,6 +39,7 @@ namespace LearnHub_Api
             services.AddScoped<ISectionService, SectionServices>();
             services.AddScoped<ILessonService, LessonServices>();
             services.AddScoped<IEnrollmentService, EnrollmentServices>();
+            services.AddScoped<IReviewService, ReviewServices>();
             
 
             services.AddMapsterServicesConfig();
