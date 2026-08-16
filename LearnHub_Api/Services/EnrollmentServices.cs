@@ -47,7 +47,6 @@ namespace LearnHub_Api.Services
 
             return Result.Success(response);
         }
-
         public async Task<Result<IEnumerable<EnrollmentResponse>>> GetMyEnrollmentsAsync(CancellationToken cancellationToken)
         {
             var studentId = _httpContextAccessor.HttpContext!.User.GetUserId();
@@ -65,5 +64,31 @@ namespace LearnHub_Api.Services
 
             return Result.Success<IEnumerable<EnrollmentResponse>>(enrollments);
         }
+        public async Task<Result<EnrollmentResponse>> GetByIdAsync(int enrollmentId,CancellationToken cancellationToken)
+        {
+            var studentId = _httpContextAccessor.HttpContext!
+                .User
+                .GetUserId();
+
+            var response = await _context.Enrollments
+                .AsNoTracking()
+                .Where(x => x.Id == enrollmentId 
+                &&x.StudentId == studentId)
+                .Select(x => new EnrollmentResponse(
+                    x.Id,
+                    x.CourseId,
+                    x.Course.Title,
+                    x.Progress,
+                    x.EnrolledOn
+                ))
+                .SingleOrDefaultAsync(cancellationToken);
+
+            if (response is null)
+                return Result.Failure<EnrollmentResponse>(
+                    EnrollmentErrors.NotFound);
+
+            return Result.Success(response);
+        }
+
     }
 }
