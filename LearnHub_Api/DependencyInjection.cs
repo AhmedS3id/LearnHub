@@ -31,13 +31,14 @@ namespace LearnHub_Api
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddFluentValidationAutoValidation();
 
-            services.AddScoped<IAuthServices, AuthServices>();
+            services.AddScoped<IAuthService, AuthServices>();
             services.AddScoped<IEmailSender, EmailServices>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IUserService, UserServices>();
+            services.AddScoped<ICategoryService, CategoryServices>();
             services.AddScoped<ICourseService, CourseServices>();
             services.AddScoped<ISectionService, SectionServices>();
             services.AddScoped<ILessonService, LessonServices>();
+            services.AddScoped<IEnrollmentService, EnrollmentServices>();
             
 
             services.AddMapsterServicesConfig();
