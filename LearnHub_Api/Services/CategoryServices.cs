@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace LearnHub_Api.Services
 {
-    public class CategoryService(ApplicationDbContext context) : ICategoryService
+    public class CategoryServices(ApplicationDbContext context) : ICategoryService
     {
         private readonly ApplicationDbContext _context = context;
 

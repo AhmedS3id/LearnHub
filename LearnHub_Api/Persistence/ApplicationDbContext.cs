@@ -1,5 +1,4 @@
-﻿using LearnHub_Api.Entities;
-using LearnHub_Api.Extensions;
+﻿using LearnHub_Api.Extensions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;

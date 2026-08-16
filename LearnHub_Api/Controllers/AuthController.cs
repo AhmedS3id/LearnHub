@@ -4,10 +4,10 @@ namespace LearnHub_Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class AuthController(IAuthServices authServices) : ControllerBase
+    public class AuthController(IAuthService authServices) : ControllerBase
     {
 
-            private readonly IAuthServices _authServices = authServices;
+            private readonly IAuthService _authServices = authServices;
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(

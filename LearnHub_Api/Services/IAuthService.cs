@@ -1,6 +1,6 @@
 ﻿namespace LearnHub_Api.Services
 {
-    public interface IAuthServices
+    public interface IAuthService
     {
         Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken);
         Task<Result<AuthResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken);

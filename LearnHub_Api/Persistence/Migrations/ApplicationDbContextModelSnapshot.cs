@@ -132,7 +132,7 @@ namespace LearnHub_Api.Persistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("LearnHub_Api.Entities.Course", b =>
@@ -187,7 +187,7 @@ namespace LearnHub_Api.Persistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("LearnHub_Api.Entities.Enrollment", b =>
@@ -218,7 +218,7 @@ namespace LearnHub_Api.Persistence.Migrations
                     b.HasIndex("StudentId", "CourseId")
                         .IsUnique();
 
-                    b.ToTable("Enrollments");
+                    b.ToTable("Enrollments", (string)null);
                 });
 
             modelBuilder.Entity("LearnHub_Api.Entities.Lesson", b =>
@@ -274,7 +274,7 @@ namespace LearnHub_Api.Persistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Lessons");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("LearnHub_Api.Entities.Review", b =>
@@ -323,7 +323,7 @@ namespace LearnHub_Api.Persistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("LearnHub_Api.Entities.Section", b =>
@@ -366,7 +366,7 @@ namespace LearnHub_Api.Persistence.Migrations
 
                     b.HasIndex("UpdatedById");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

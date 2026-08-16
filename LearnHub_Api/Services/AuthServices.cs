@@ -15,7 +15,7 @@ namespace LearnHub_Api.Services
         ILogger<AuthServices>logger,
         IJwtProvider jwtProvider,
         IEmailSender emailSender,
-        IHttpContextAccessor httpContextAccessor) : IAuthServices
+        IHttpContextAccessor httpContextAccessor) : IAuthService
     {
         private readonly UserManager<ApplicationUser> _UserManager = UserManager;
         private readonly ILogger<AuthServices> _logger = logger;

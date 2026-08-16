@@ -1,5 +1,4 @@
-﻿using LearnHub_Api.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LearnHub_Api.Persistence.EntitiesConfigurations
