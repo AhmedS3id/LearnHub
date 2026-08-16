@@ -1,4 +1,4 @@
-﻿using LearnHub_Api.Contracts.Users;
+﻿using LearnHub_Api.Contracts.User;
 
 namespace LearnHub_Api.Services
 {

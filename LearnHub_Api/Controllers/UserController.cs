@@ -1,6 +1,5 @@
-﻿using LearnHub_Api.Contracts.Users;
+﻿using LearnHub_Api.Contracts.User;
 using LearnHub_Api.Extensions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
