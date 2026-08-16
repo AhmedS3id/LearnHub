@@ -28,5 +28,11 @@ namespace LearnHub_Api.Controllers
             var result = await _reviewService.UpdateAsync(reviewId, request, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
+        [HttpDelete("{reviewId}")]
+        public async Task<IActionResult> Delete([FromRoute] int reviewId, CancellationToken cancellationToken)
+        {
+            var result = await _reviewService.DeleteAsync(reviewId, cancellationToken);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }

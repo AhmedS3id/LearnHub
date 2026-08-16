@@ -7,5 +7,6 @@ namespace LearnHub_Api.Services
         Task<Result<ReviewResponse>> CreateAsync(int courseId,ReviewRequest request,CancellationToken cancellationToken);
         Task<Result<IEnumerable<ReviewResponse>>> GetAllReviewsAsync(int courseId, CancellationToken cancellationToken);
         Task<Result> UpdateAsync(int reviewId,ReviewRequest request, CancellationToken cancellationToken);
+        Task<Result> DeleteAsync(int reviewId, CancellationToken cancellationToken);
     }
 }

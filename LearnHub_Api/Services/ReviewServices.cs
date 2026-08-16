@@ -52,7 +52,6 @@ namespace LearnHub_Api.Services
 
             return Result.Success(response);
         }
-
         public async Task<Result<IEnumerable<ReviewResponse>>>GetAllReviewsAsync(int courseId, CancellationToken cancellationToken)
         {
             var course = await _context.Courses
@@ -97,5 +96,21 @@ namespace LearnHub_Api.Services
 
             return Result.Success();
         }
+        public async Task<Result> DeleteAsync(int reviewId, CancellationToken cancellationToken)
+        {
+            var studentId = _httpContextAccessor.HttpContext!.User.GetUserId();
+
+            var review = await _context.Reviews
+                .FirstOrDefaultAsync(x => x.Id == reviewId
+                && x.StudentId == studentId, cancellationToken);
+
+            if (review is null)
+                return Result.Failure(ReviewErrors.NotFound);
+
+            _context.Remove(review);
+            await _context.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }
+
     }
 }
