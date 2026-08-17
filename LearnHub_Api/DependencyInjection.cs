@@ -45,6 +45,8 @@ namespace LearnHub_Api
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
+            services.AddHybridCache();
+
             services.AddMapsterServicesConfig();
             services.AddAuthConfig(configuration);
 

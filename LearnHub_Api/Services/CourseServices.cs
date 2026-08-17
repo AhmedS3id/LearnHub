@@ -1,11 +1,15 @@
 ﻿using LearnHub_Api.Contracts.Course;
 using LearnHub_Api.Extensions;
+using Microsoft.Extensions.Caching.Hybrid;
 namespace LearnHub_Api.Services
 {
-    public class CourseServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ICourseService
+    public class CourseServices(ApplicationDbContext context,
+        IHttpContextAccessor httpContextAccessor,
+        HybridCache hybridCache) : ICourseService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly HybridCache _hybridCache = hybridCache;
 
         public async Task<Result<CourseResponse>> CreateAsync(CourseRequest request,CancellationToken cancellationToken)
         {
@@ -29,6 +33,7 @@ namespace LearnHub_Api.Services
 
             await _context.Courses.AddAsync(course, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync("courses:all",cancellationToken);
 
             var response = new CourseResponse(
                 course.Id,
@@ -42,14 +47,28 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
         }
 
-        public async Task<IEnumerable<CourseResponse>> GetAllAsync(CancellationToken cancellationToken)=>
-            await _context.Courses
-            .AsNoTracking()
-            .ProjectToType<CourseResponse>()
-            .ToListAsync(cancellationToken);
+        public async Task<IEnumerable<CourseResponse>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            const string cacheKey = "courses:all";
+
+            var options = new HybridCacheEntryOptions
+            {
+                Expiration = TimeSpan.FromMinutes(5),
+                LocalCacheExpiration = TimeSpan.FromMinutes(1)
+            };
+
+            return await _hybridCache.GetOrCreateAsync(
+                    cacheKey,
+                    async cancellationToken =>
+                    await _context.Courses
+                    .AsNoTracking()
+                    .ProjectToType<CourseResponse>()
+                    .ToListAsync(cancellationToken),cancellationToken: cancellationToken);
+        }
 
         public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId,CancellationToken cancellationToken)
         {
+
             var categoryExists = await _context.Categories
                 .AnyAsync(x => x.Id == categoryId, cancellationToken);
 
@@ -105,6 +124,7 @@ namespace LearnHub_Api.Services
             course.CategoryId= request.CategoryId;
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync("courses:all", cancellationToken);
 
             return Result.Success();
         }
@@ -123,6 +143,7 @@ namespace LearnHub_Api.Services
 
              _context.Remove(course); 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync("courses:all", cancellationToken);
 
             return Result.Success();
         }
