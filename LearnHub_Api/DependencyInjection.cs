@@ -40,7 +40,10 @@ namespace LearnHub_Api
             services.AddScoped<ILessonService, LessonServices>();
             services.AddScoped<IEnrollmentService, EnrollmentServices>();
             services.AddScoped<IReviewService, ReviewServices>();
-            
+
+
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
 
             services.AddMapsterServicesConfig();
             services.AddAuthConfig(configuration);
