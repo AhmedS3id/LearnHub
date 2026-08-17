@@ -1,6 +1,12 @@
 using LearnHub_Api;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configurations) =>
+{
+    configurations.ReadFrom.Configuration(context.Configuration);
+});
 
 // Add services to the container.
 
@@ -13,6 +19,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
+
 app.UseCors();
 
 app.UseAuthorization();
