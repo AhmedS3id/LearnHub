@@ -1,4 +1,5 @@
 ﻿
+using Hangfire;
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Consts;
 using LearnHub_Api.Entities;
@@ -256,7 +257,8 @@ namespace LearnHub_Api.Services
                     { "{{action_url}}", $"{Origin}/auth/forgetPassword?email={user.Email}&code={code}" }
                 }
             );
-            await _emailSender.SendEmailAsync(user.Email!, "✅ Learn Hub : Change Password ", EmailBody);
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ LearnHub: Change Password ", EmailBody));
+            await Task.CompletedTask;
         }
         private async Task SendConfirmationEmail(ApplicationUser user, string code)
         {
@@ -265,10 +267,11 @@ namespace LearnHub_Api.Services
             var EmailBody = EmailBodyBuilder.GenerateEmailBody("EmailConfirmation", new Dictionary<string, string>
                 {
                     {"{{UserName}}",user.FirstName },
-                    {"{{AppName}}" ,"Survey Basket"},
+                    {"{{AppName}}" ,"LearnHub"},
                     {"{{ConfirmationLink}}",$"{Origin}/auth/emailConfirmation?userId={user.Id}&code={code}" }
                 });
-           await _emailSender.SendEmailAsync(user.Email!, "✅ Learn Hub : Email Confirmation", EmailBody);
+            BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ LearnHub : Email Confirmation", EmailBody));
+            await Task.CompletedTask;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Hangfire;
+using HangfireBasicAuthenticationFilter;
 using LearnHub_Api;
 using Serilog;
 
@@ -21,7 +22,11 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.UseHangfireDashboard("/jobs");
+app.UseHangfireDashboard("/jobs", new DashboardOptions
+{
+    DashboardTitle = "LearnHub Dashboard",
+    //IsReadOnlyFunc = (DashboardContext context) => true
+});
 
 app.UseSerilogRequestLogging();
 
