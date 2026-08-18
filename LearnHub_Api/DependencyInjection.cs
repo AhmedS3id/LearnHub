@@ -1,4 +1,5 @@
 ﻿using FluentValidation.AspNetCore;
+using Hangfire;
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,6 +50,7 @@ namespace LearnHub_Api
 
             services.AddMapsterServicesConfig();
             services.AddAuthConfig(configuration);
+            services.AddBackgroundJobsConfig(configuration);
 
             return services;
         }
@@ -100,6 +102,19 @@ namespace LearnHub_Api
                     ValidAudience = JwtSettings?.Audience
                 };
             });
+
+            return services;
+        }
+        private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+            services.AddHangfireServer();
 
             return services;
         }

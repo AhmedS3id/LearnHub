@@ -1,3 +1,4 @@
+using Hangfire;
 using LearnHub_Api;
 using Serilog;
 
@@ -19,6 +20,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.UseHangfireDashboard("/jobs");
 
 app.UseSerilogRequestLogging();
 
