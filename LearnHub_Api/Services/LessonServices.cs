@@ -1,9 +1,6 @@
 ﻿using LearnHub_Api.Contracts.Lesson;
-using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Hybrid;
-using System.Reflection.Metadata.Ecma335;
 
 namespace LearnHub_Api.Services
 {
