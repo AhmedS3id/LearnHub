@@ -1,14 +1,16 @@
 ﻿using LearnHub_Api.Contracts.Review;
-using LearnHub_Api.Contracts.Section;
 using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
-using System.Collections.Generic;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace LearnHub_Api.Services
 {
-    public class ReviewServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : IReviewService
+    public class ReviewServices(ApplicationDbContext context
+        , HybridCache hybridCache
+        , IHttpContextAccessor httpContextAccessor) : IReviewService
     {
         private readonly ApplicationDbContext _context = context;
+        private readonly HybridCache _hybridCache = hybridCache;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<Result<ReviewResponse>> CreateAsync(int courseId, ReviewRequest request, CancellationToken cancellationToken)
@@ -40,6 +42,7 @@ namespace LearnHub_Api.Services
 
             await _context.Reviews.AddAsync(review, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{courseId}:reviews",cancellationToken);
 
             var response = new ReviewResponse(
                 review.Id,
@@ -62,7 +65,10 @@ namespace LearnHub_Api.Services
             if (course is null)
                 return Result.Failure <IEnumerable<ReviewResponse>>(CourseErrors.NotFound);
 
-            var reviews = await _context.Reviews
+            var cashKey=$"course: { courseId}:reviews";
+
+            var reviews = await _hybridCache.GetOrCreateAsync(cashKey, async cancellationToken =>
+                await _context.Reviews
                 .AsNoTracking()
                 .Where(x => x.CourseId == courseId)
                 .Select(x => new ReviewResponse(
@@ -72,8 +78,7 @@ namespace LearnHub_Api.Services
                     x.Comment,
                     x.Rating,
                     x.CreatedOn
-                ))
-                .ToListAsync(cancellationToken);
+                )).ToListAsync(cancellationToken), cancellationToken: cancellationToken);
 
             return Result.Success<IEnumerable<ReviewResponse>>(reviews);
         }
@@ -109,6 +114,7 @@ namespace LearnHub_Api.Services
 
             _context.Remove(review);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{review.CourseId}:reviews", cancellationToken);
             return Result.Success();
         }
 
