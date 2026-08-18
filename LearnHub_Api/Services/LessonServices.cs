@@ -2,15 +2,19 @@
 using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Hybrid;
 using System.Reflection.Metadata.Ecma335;
-using static System.Collections.Specialized.BitVector32;
 
 namespace LearnHub_Api.Services
 {
-    public class LessonServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ILessonService
+    public class LessonServices(ApplicationDbContext context,
+        IHttpContextAccessor httpContextAccessor,
+        HybridCache hybridCache) : ILessonService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly HybridCache _hybridCache = hybridCache;
+
         public async Task<Result<LessonResponse>> CreateAsync(int sectionId, LessonRequest request, CancellationToken cancellationToken)
         {
             var section = await _context.Sections
@@ -50,6 +54,7 @@ namespace LearnHub_Api.Services
                 cancellationToken);
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{section.CourseId}:content",cancellationToken);
 
             var response = lesson.Adapt<LessonResponse>();
 
@@ -62,7 +67,10 @@ namespace LearnHub_Api.Services
             if (!courseExists)
                 return Result.Failure<IEnumerable<SectionWithLessonsResponse>>(CourseErrors.NotFound);
 
-            var response = await _context.Sections
+            var cacheKey = $"course:{courseId}:content";
+
+            var response = await _hybridCache.GetOrCreateAsync(cacheKey, async cancellationToken =>
+            await _context.Sections
                 .AsNoTracking()
                 .Where(x => x.CourseId == courseId)
                 .OrderBy(x => x.Order)
@@ -70,11 +78,13 @@ namespace LearnHub_Api.Services
                     s.Id,
                     s.Title,
                     s.Order,
-                    s.Lessons.OrderBy(l => l.Order).Select(l => new LessonResponse(
+                    s.Lessons
+                    .OrderBy(l => l.Order)
+                    .Select(l => new LessonResponse(
                         l.Id, l.Title, l.Description, l.VideoUrl, l.DurationInMinutes, l.Order
                     ))
                 ))
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken), cancellationToken: cancellationToken);
 
             return Result.Success<IEnumerable<SectionWithLessonsResponse>>(response);
         }
@@ -118,7 +128,8 @@ namespace LearnHub_Api.Services
                 .Select(x => new
                 {
                     Lesson = x,
-                    InstructorId = x.Section.Course.InstructorId
+                    x.Section.CourseId,
+                    x.Section.Course.InstructorId
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -144,6 +155,7 @@ namespace LearnHub_Api.Services
             lesson.Order = request.Order;
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{result.CourseId}:content", cancellationToken);
             return Result.Success();
         }
         public async Task<Result> DeleteAsync(int sectionId, int lessonId, CancellationToken cancellationToken)
@@ -154,6 +166,7 @@ namespace LearnHub_Api.Services
               .Select(x => new
               {
                   Lesson = x,
+                  x.Section.CourseId,
                   x.Section.Course.InstructorId
               })
               .FirstOrDefaultAsync(cancellationToken);
@@ -167,6 +180,7 @@ namespace LearnHub_Api.Services
 
             _context.Lessons.Remove(result.Lesson);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{result.CourseId}:content",cancellationToken);
 
             return Result.Success();
         }
