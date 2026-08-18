@@ -28,6 +28,11 @@ app.UseHangfireDashboard("/jobs", new DashboardOptions
     //IsReadOnlyFunc = (DashboardContext context) => true
 });
 
+RecurringJob.AddOrUpdate<IRefreshTokenCleanupJob>(
+    "cleanup-expired-refresh-tokens",
+    job => job.CleanupAsync(),
+    Cron.Daily(3, 0));
+
 app.UseSerilogRequestLogging();
 
 app.UseCors();

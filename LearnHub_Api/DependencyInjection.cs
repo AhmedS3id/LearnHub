@@ -41,6 +41,7 @@ namespace LearnHub_Api
             services.AddScoped<ILessonService, LessonServices>();
             services.AddScoped<IEnrollmentService, EnrollmentServices>();
             services.AddScoped<IReviewService, ReviewServices>();
+            services.AddScoped<IRefreshTokenCleanupJob, RefreshTokenCleanupJob>();
 
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
