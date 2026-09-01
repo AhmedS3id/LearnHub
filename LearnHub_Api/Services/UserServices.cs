@@ -1,4 +1,5 @@
-﻿using LearnHub_Api.Contracts.User;
+﻿using LearnHub_Api.Abstractions.Consts;
+using LearnHub_Api.Contracts.User;
 using LearnHub_Api.Errors;
 
 namespace LearnHub_Api.Services
@@ -39,6 +40,55 @@ namespace LearnHub_Api.Services
 
             return Result.Success(user);
         }
+
+        public async Task<Result> PromoteToInstructorAsync(string userId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            if (await _userManager.IsInRoleAsync(
+                user, DefaultRoles.Instructor))
+                return Result.Failure(UserErrors.AlreadyInstructor);
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    cancellationToken);
+
+            try
+            {
+                if (await _userManager.IsInRoleAsync(
+                    user, DefaultRoles.Member))
+                {
+                    var removeResult =await _userManager.RemoveFromRoleAsync( user,DefaultRoles.Member);
+
+                    if (!removeResult.Succeeded)
+                    {
+                        await transaction.RollbackAsync(cancellationToken);
+                        return Result.Failure(UserErrors.RoleAssignmentFailed);
+                    }
+                }
+
+                var addResult =await _userManager.AddToRoleAsync(user,DefaultRoles.Instructor);
+
+                if (!addResult.Succeeded)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    return Result.Failure( UserErrors.RoleAssignmentFailed);
+                }
+
+                await transaction.CommitAsync(cancellationToken);
+
+                return Result.Success();
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        }
+
         public async Task<Result> UpdateUserProfileAsync(string Id, UpdateProfileRequest request)
         {
             var user = await _userManager.Users

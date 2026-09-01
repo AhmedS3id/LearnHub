@@ -1,5 +1,6 @@
 ﻿
 using Hangfire;
+using LearnHub_Api.Abstractions.Consts;
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Consts;
 using LearnHub_Api.Entities;
@@ -217,6 +218,13 @@ namespace LearnHub_Api.Services
             var result = await _UserManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
+                var roleResult = await _UserManager.AddToRoleAsync(
+                    user,
+                    DefaultRoles.Member);
+
+                if (!roleResult.Succeeded)
+                    return Result.Failure(UserErrors.RoleAssignmentFailed);
+
                 return Result.Success();
             }
             var error = result.Errors.First();
