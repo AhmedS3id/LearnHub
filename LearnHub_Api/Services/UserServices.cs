@@ -3,7 +3,7 @@ using LearnHub_Api.Errors;
 
 namespace LearnHub_Api.Services
 {
-    public class UserServices(UserManager<ApplicationUser>userManager,ApplicationDbContext context ):IUserService
+    public class UserServices(UserManager<ApplicationUser> userManager, ApplicationDbContext context) : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly ApplicationDbContext _context = context;
