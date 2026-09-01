@@ -1,8 +1,5 @@
 ﻿using LearnHub_Api.Contracts.Section;
-using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
-using Microsoft.EntityFrameworkCore;
-
 namespace LearnHub_Api.Services
 {
     public class SectionServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ISectionService

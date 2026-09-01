@@ -1,6 +1,4 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-
 namespace LearnHub_Api.Services
 {
     public class RefreshTokenCleanupJob(ApplicationDbContext context,ILogger<RefreshTokenCleanupJob> logger) : IRefreshTokenCleanupJob

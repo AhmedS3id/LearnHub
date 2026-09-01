@@ -1,15 +1,10 @@
 ﻿using LearnHub_Api.Extensions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Security.Claims;
 
 namespace LearnHub_Api.Persistence
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext>options,IHttpContextAccessor httpContextAccessor)
-        : IdentityDbContext<ApplicationUser>(options)
+        : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
     {
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
