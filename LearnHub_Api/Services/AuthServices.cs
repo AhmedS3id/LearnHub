@@ -9,6 +9,7 @@ using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -67,7 +68,9 @@ namespace LearnHub_Api.Services
             if (!await _UserManager.CheckPasswordAsync(user, request.Password))
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-            var (token, expireIn) = _jwtProvider.GenerateToken(user);
+            var (userRoles, Permission) = await GetRolesAndPermission(user, cancellationToken);
+
+            var (token, expireIn) = _jwtProvider.GenerateToken(user, userRoles, Permission);
             var refreshToken = GenerateRefreshToken();
             var refreshTokenExpirationDate = DateTime.UtcNow.AddDays(15);
 
@@ -111,7 +114,10 @@ namespace LearnHub_Api.Services
 
             userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-            var (newToken, expireIn) = _jwtProvider.GenerateToken(user);
+            var (userRoles, Permission) = await GetRolesAndPermission(user, cancellationToken);
+
+            var (newToken, expireIn) = _jwtProvider.GenerateToken(user, userRoles, Permission);
+
             var newRefreshToken = GenerateRefreshToken();
             var expirationDate = DateTime.UtcNow.AddDays(15);
 
@@ -280,6 +286,19 @@ namespace LearnHub_Api.Services
                 });
             BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ LearnHub : Email Confirmation", EmailBody));
             await Task.CompletedTask;
+        }
+         private async Task <(IEnumerable<string> Roles,IEnumerable<string> Permission)> GetRolesAndPermission(ApplicationUser user,CancellationToken cancellationToken)
+        { 
+            var userRoles = await _UserManager.GetRolesAsync(user);
+
+            var Permission = await(from r in _context.Roles
+                                join p in _context.RoleClaims
+                                on r.Id equals p.RoleId
+                                where userRoles.Contains(r.Name!)
+                                select p.ClaimValue)
+                                .Distinct()
+                                .ToListAsync(cancellationToken);
+            return (userRoles, Permission);
         }
     }
 }
