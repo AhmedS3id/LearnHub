@@ -1,5 +1,7 @@
-﻿using LearnHub_Api.Contracts.User;
+﻿using LearnHub_Api.Authentication.Filter;
+using LearnHub_Api.Contracts.User;
 using LearnHub_Api.Extensions;
+using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -29,6 +31,7 @@ namespace LearnHub_Api.Controllers
 
         }
         [HttpPut("info")]
+        [HasPermission(Permissions.UpdateProfile)]
         public async Task<IActionResult> UpdateUserProfile( [FromBody] UpdateProfileRequest request)
         {
             var result = await _userService.UpdateUserProfileAsync(User.GetUserId()!, request);

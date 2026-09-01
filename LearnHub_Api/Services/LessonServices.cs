@@ -1,4 +1,5 @@
-﻿using LearnHub_Api.Contracts.Lesson;
+﻿using LearnHub_Api.Abstractions.Consts;
+using LearnHub_Api.Contracts.Lesson;
 using LearnHub_Api.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 
@@ -24,11 +25,7 @@ namespace LearnHub_Api.Services
                 return Result.Failure<LessonResponse>(
                     SectionErrors.NotFound);
 
-            var instructorId = _httpContextAccessor.HttpContext!
-                .User
-                .GetUserId();
-
-            if (section.Course.InstructorId != instructorId)
+            if (!IsAuthorizedInstructor(section.Course.InstructorId))
                 return Result.Failure<LessonResponse>(
                     LessonErrors.Unauthorized);
 
@@ -51,12 +48,13 @@ namespace LearnHub_Api.Services
                 cancellationToken);
 
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync($"course:{section.CourseId}:content",cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{section.CourseId}:content", cancellationToken);
 
             var response = lesson.Adapt<LessonResponse>();
 
             return Result.Success(response);
         }
+
         public async Task<Result<IEnumerable<SectionWithLessonsResponse>>> GetCourseContentAsync(int courseId, CancellationToken cancellationToken)
         {
             var courseExists = await _context.Courses
@@ -85,10 +83,11 @@ namespace LearnHub_Api.Services
 
             return Result.Success<IEnumerable<SectionWithLessonsResponse>>(response);
         }
+
         public async Task<Result<LessonResponse>> GetByIdAsync(int sectionId, int lessonId, CancellationToken cancellationToken)
         {
             var section = await _context.Sections
-                .AnyAsync(x => x.Id == sectionId,cancellationToken);
+                .AnyAsync(x => x.Id == sectionId, cancellationToken);
             if (!section)
                 return Result.Failure<LessonResponse>(
                     SectionErrors.NotFound);
@@ -108,18 +107,55 @@ namespace LearnHub_Api.Services
 
         public async Task<Result> UpdateAsync(int sectionId, int lessonId, LessonRequest request, CancellationToken cancellationToken)
         {
-            //var lesson = await _context.Lessons
-            //  .Include(x => x.Section)
-            //  .ThenInclude(x => x.Course)
-            //  .FirstOrDefaultAsync(
-            //      x => x.Id == lessonId &&
-            //           x.SectionId == sectionId,
-            //      cancellationToken);
-            //var lesson = await _context.Lessons
-            //    .Include(x=>x.Section)
-            //    .FirstOrDefaultAsync(x => x.Id == lessonId
-            //    && x.SectionId == sectionId, cancellationToken);
+            var lessonInfo = await GetLessonWithOwnershipAsync(sectionId, lessonId, cancellationToken);
+            if (lessonInfo is null)
+                return Result.Failure(LessonErrors.NotFound);
 
+            if (!IsAuthorizedInstructor(lessonInfo.InstructorId))
+                return Result.Failure(LessonErrors.Unauthorized);
+
+            var orderExists = await _context.Lessons.AnyAsync(
+                x => x.SectionId == sectionId
+                     && x.Order == request.Order
+                     && x.Id != lessonId, cancellationToken);
+            if (orderExists)
+                return Result.Failure(LessonErrors.DuplicatedOrder);
+
+            var lesson = lessonInfo.Lesson;
+            lesson.Title = request.Title;
+            lesson.Description = request.Description;
+            lesson.VideoUrl = request.VideoUrl;
+            lesson.DurationInMinutes = request.DurationInMinutes;
+            lesson.Order = request.Order;
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{lessonInfo.CourseId}:content", cancellationToken);
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteAsync(int sectionId, int lessonId, CancellationToken cancellationToken)
+        {
+            var lessonInfo = await GetLessonWithOwnershipAsync(sectionId, lessonId, cancellationToken);
+            if (lessonInfo is null)
+                return Result.Failure(LessonErrors.NotFound);
+
+            if (!IsAuthorizedInstructor(lessonInfo.InstructorId))
+                return Result.Failure(LessonErrors.Unauthorized);
+
+            _context.Lessons.Remove(lessonInfo.Lesson);
+            await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{lessonInfo.CourseId}:content", cancellationToken);
+
+            return Result.Success();
+        }
+
+        // ---- Helpers ----
+
+        private sealed record LessonOwnershipInfo(Lesson Lesson, int CourseId, string InstructorId);
+
+        private async Task<LessonOwnershipInfo?> GetLessonWithOwnershipAsync(
+            int sectionId, int lessonId, CancellationToken cancellationToken)
+        {
             var result = await _context.Lessons
                 .Where(x => x.Id == lessonId && x.SectionId == sectionId)
                 .Select(x => new
@@ -130,56 +166,20 @@ namespace LearnHub_Api.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (result is null)
-                return Result.Failure(LessonErrors.NotFound);
-
-            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
-            if (result.InstructorId != instructorId)
-                return Result.Failure(LessonErrors.Unauthorized);
-
-            var orderExists = await _context.Lessons.AnyAsync(
-                x => x.SectionId == sectionId
-                     && x.Order == request.Order
-                     && x.Id != lessonId, cancellationToken);
-            if (orderExists)
-                return Result.Failure(LessonErrors.DuplicatedOrder);
-
-            var lesson = result.Lesson;
-            lesson.Title = request.Title;
-            lesson.Description = request.Description;
-            lesson.VideoUrl = request.VideoUrl;
-            lesson.DurationInMinutes = request.DurationInMinutes;
-            lesson.Order = request.Order;
-
-            await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync($"course:{result.CourseId}:content", cancellationToken);
-            return Result.Success();
+            return result is null
+                ? null
+                : new LessonOwnershipInfo(result.Lesson, result.CourseId, result.InstructorId);
         }
-        public async Task<Result> DeleteAsync(int sectionId, int lessonId, CancellationToken cancellationToken)
+
+        private bool IsAuthorizedInstructor(string courseInstructorId)
         {
+            var user = _httpContextAccessor.HttpContext!.User;
 
-            var result = await _context.Lessons
-              .Where(x => x.Id == lessonId && x.SectionId == sectionId)
-              .Select(x => new
-              {
-                  Lesson = x,
-                  x.Section.CourseId,
-                  x.Section.Course.InstructorId
-              })
-              .FirstOrDefaultAsync(cancellationToken);
+            if (user.IsInRole(DefaultRoles.Admin))
+                return true;
 
-            if (result is null)
-                return Result.Failure(LessonErrors.NotFound);
-
-            var instructorId = _httpContextAccessor.HttpContext!.User.GetUserId();
-            if (result.InstructorId != instructorId)
-                return Result.Failure(LessonErrors.Unauthorized);
-
-            _context.Lessons.Remove(result.Lesson);
-            await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync($"course:{result.CourseId}:content",cancellationToken);
-
-            return Result.Success();
+            var currentUserId = user.GetUserId();
+            return courseInstructorId == currentUserId;
         }
     }
 }

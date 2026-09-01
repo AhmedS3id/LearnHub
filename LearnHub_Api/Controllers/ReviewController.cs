@@ -1,4 +1,6 @@
-﻿using LearnHub_Api.Contracts.Review;
+﻿using LearnHub_Api.Authentication.Filter;
+using LearnHub_Api.Contracts.Review;
+using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -17,18 +19,21 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpGet("course/{courseId}")]
+        [HasPermission(Permissions.GetReviews)]
         public async Task<IActionResult> GetAllReviews([FromRoute] int courseId,CancellationToken cancellationToken)
         {
             var result = await _reviewService.GetAllReviewsAsync(courseId,cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPut("{reviewId}")]
-        public async Task<IActionResult> GetAllReviews([FromRoute] int reviewId, [FromBody] ReviewRequest request, CancellationToken cancellationToken)
+        [HasPermission(Permissions.UpdateReviews)]
+        public async Task<IActionResult> UpdateReviews([FromRoute] int reviewId, [FromBody] ReviewRequest request, CancellationToken cancellationToken)
         {
             var result = await _reviewService.UpdateAsync(reviewId, request, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
         [HttpDelete("{reviewId}")]
+        [HasPermission(Permissions.DeleteReviews)]
         public async Task<IActionResult> Delete([FromRoute] int reviewId, CancellationToken cancellationToken)
         {
             var result = await _reviewService.DeleteAsync(reviewId, cancellationToken);

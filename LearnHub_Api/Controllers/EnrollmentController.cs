@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LearnHub_Api.Authentication.Filter;
+using LearnHub_API.Abstractions.Consts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -10,6 +12,7 @@ namespace LearnHub_Api.Controllers
     {
         private readonly IEnrollmentService _enrollment = enrollment;
         [HttpPost("course/{courseId}")]
+        [HasPermission(Permissions.AddEnrollments)]
         public async Task<IActionResult> Create([FromRoute] int courseId,CancellationToken cancellationToken)
         {
             var result = await _enrollment.CreateAsync(courseId, cancellationToken);
@@ -21,7 +24,8 @@ namespace LearnHub_Api.Controllers
             var result = await _enrollment.GetMyEnrollmentsAsync( cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-        [HttpPut("{enrollmentId}")]
+        [HttpGet("{enrollmentId}")]
+        [HasPermission(Permissions.GetEnrollments)]
         public async Task<IActionResult> GetById([FromRoute]int enrollmentId,CancellationToken cancellationToken)
         {
             var result = await _enrollment.GetByIdAsync(enrollmentId, cancellationToken);
