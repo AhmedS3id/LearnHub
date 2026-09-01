@@ -76,7 +76,7 @@ namespace LearnHub_Api
 
             services.AddSingleton<IJwtProvider, JwtProvider>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 options.Password.RequiredLength = 8;
                 options.SignIn.RequireConfirmedEmail = true;

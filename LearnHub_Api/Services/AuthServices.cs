@@ -1,14 +1,9 @@
-﻿
-using Hangfire;
+﻿using Hangfire;
 using LearnHub_Api.Abstractions.Consts;
 using LearnHub_Api.Authentication;
-using LearnHub_Api.Consts;
-using LearnHub_Api.Entities;
-using LearnHub_Api.Errors;
 using LearnHub_Api.Helpers;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
