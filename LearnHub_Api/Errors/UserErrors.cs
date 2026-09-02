@@ -32,11 +32,6 @@ public static class UserErrors
         "A user with this email already exists.",
         StatusCodes.Status409Conflict);
 
-    public static readonly Error AlreadyInstructor = new(
-        "User.AlreadyInstructor",
-        "This user with this Role already exists.",
-        StatusCodes.Status409Conflict);
-
     public static readonly Error EmailNotConfirmed = new(
         "User.EmailNotConfirmed",
         "Please confirm your email address before signing in.",
@@ -62,13 +57,23 @@ public static class UserErrors
         "The current password is incorrect.",
         StatusCodes.Status400BadRequest);
 
-        public static readonly Error RoleAssignmentFailed = new(
-        "User.RoleAssignmentFailed",
-        "Role Assignment Failed.",
-        StatusCodes.Status400BadRequest);
-
     public static readonly Error PasswordMismatch = new(
         "User.PasswordMismatch",
         "The new password and confirmation password do not match.",
+        StatusCodes.Status400BadRequest);
+
+    public static readonly Error AlreadyInRole = new(
+    "User.AlreadyInRole",
+    "This user with this Role already exists.",
+    StatusCodes.Status409Conflict);
+
+    public static readonly Error RoleNotFound = new(
+        "Role.RoleNotFound",
+        "Role Not Found.",
+        StatusCodes.Status404NotFound);
+
+    public static readonly Error RoleAssignmentFailed = new(
+        "User.RoleAssignmentFailed",
+        "Role Assignment Failed.",
         StatusCodes.Status400BadRequest);
 }

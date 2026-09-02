@@ -30,6 +30,7 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
 
         }
+
         [HttpPut("info")]
         [HasPermission(Permissions.UpdateProfile)]
         public async Task<IActionResult> UpdateUserProfile( [FromBody] UpdateProfileRequest request)

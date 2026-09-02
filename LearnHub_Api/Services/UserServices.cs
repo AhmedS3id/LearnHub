@@ -41,16 +41,22 @@ namespace LearnHub_Api.Services
             return Result.Success(user);
         }
 
-        public async Task<Result> PromoteToInstructorAsync(string userId, CancellationToken cancellationToken)
+        public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
                 return Result.Failure(UserErrors.UserNotFound);
 
-            if (await _userManager.IsInRoleAsync(
-                user, DefaultRoles.Instructor))
-                return Result.Failure(UserErrors.AlreadyInstructor);
+            if (role.Role != DefaultRoles.Member &&
+                role.Role != DefaultRoles.Instructor &&
+                role.Role != DefaultRoles.Admin)
+            {
+                return Result.Failure(UserErrors.RoleNotFound);
+            }
+
+            if (await _userManager.IsInRoleAsync(user, role.Role))
+                return Result.Failure(UserErrors.AlreadyInRole);
 
             await using var transaction =
                 await _context.Database.BeginTransactionAsync(
@@ -58,24 +64,30 @@ namespace LearnHub_Api.Services
 
             try
             {
-                if (await _userManager.IsInRoleAsync(
-                    user, DefaultRoles.Member))
+                var currentRoles = await _userManager.GetRolesAsync(user);
+
+                if (currentRoles.Any())
                 {
-                    var removeResult =await _userManager.RemoveFromRoleAsync( user,DefaultRoles.Member);
+                    var removeResult =
+                        await _userManager.RemoveFromRolesAsync(
+                            user,
+                            currentRoles);
 
                     if (!removeResult.Succeeded)
                     {
                         await transaction.RollbackAsync(cancellationToken);
-                        return Result.Failure(UserErrors.RoleAssignmentFailed);
+                        return Result.Failure(
+                            UserErrors.RoleAssignmentFailed);
                     }
                 }
 
-                var addResult =await _userManager.AddToRoleAsync(user,DefaultRoles.Instructor);
+                var addResult =await _userManager.AddToRoleAsync(user, role.Role);
 
                 if (!addResult.Succeeded)
                 {
                     await transaction.RollbackAsync(cancellationToken);
-                    return Result.Failure( UserErrors.RoleAssignmentFailed);
+                    return Result.Failure(
+                        UserErrors.RoleAssignmentFailed);
                 }
 
                 await transaction.CommitAsync(cancellationToken);
