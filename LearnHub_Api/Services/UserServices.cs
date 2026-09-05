@@ -32,6 +32,23 @@ namespace LearnHub_Api.Services
                         g.Key.IsDisabled,
                         g.Select(x => x.Name!).ToList()
                    )).ToListAsync();
+
+        public async Task<Result<UserResponse>> GetByIdAsync(string id)
+        {
+            if (await _userManager.FindByIdAsync(id) is not { } user)
+                return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var Response = new UserResponse
+            (
+                 id,
+                 user.FirstName,
+                 user.LastName,
+                 user.Email!,
+                 user.IsDisabled,
+                 userRoles
+            );
+            return Result.Success(Response);
+        }
         public async Task <Result> ChangePasswordAsync(string UserId,ChangePasswordRequest request)
         {
             var user = await _userManager.FindByIdAsync(UserId);

@@ -26,5 +26,12 @@ namespace LearnHub_Api.Controllers
 
             return Ok(result);
         }
+        [Route("{userId}")]
+        public async Task<IActionResult> GetById([FromRoute]string userId,CancellationToken cancellationToken)
+        {
+            var result = await _userService.GetByIdAsync(userId);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }
