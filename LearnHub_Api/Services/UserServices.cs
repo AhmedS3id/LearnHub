@@ -1,6 +1,5 @@
 ﻿using LearnHub_Api.Abstractions.Consts;
 using LearnHub_Api.Contracts.User;
-using LearnHub_Api.Errors;
 
 namespace LearnHub_Api.Services
 {
@@ -8,6 +7,31 @@ namespace LearnHub_Api.Services
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly ApplicationDbContext _context = context;
+
+        public async Task<IEnumerable<UserResponse>> GetAllAsync() =>
+            await (from u in _context.Users
+                   join ur in _context.UserRoles
+                   on u.Id equals ur.UserId
+                   join r in _context.Roles
+                   on ur.RoleId equals r.Id
+                   group r by new
+                   {
+                       u.Id,
+                       u.FirstName,
+                       u.LastName,
+                       u.Email,
+                       u.IsDisabled
+                   } into g
+                   where !g.Any(x => x.Name == DefaultRoles.Member)
+                   select new UserResponse
+                   (
+                        g.Key.Id,
+                        g.Key.FirstName,
+                        g.Key.LastName,
+                        g.Key.Email!,
+                        g.Key.IsDisabled,
+                        g.Select(x => x.Name!).ToList()
+                   )).ToListAsync();
         public async Task <Result> ChangePasswordAsync(string UserId,ChangePasswordRequest request)
         {
             var user = await _userManager.FindByIdAsync(UserId);

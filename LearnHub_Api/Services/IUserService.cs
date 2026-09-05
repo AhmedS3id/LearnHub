@@ -8,5 +8,7 @@ namespace LearnHub_Api.Services
         Task<Result<UsersProfileResponse>> GetProfileAsync(String Id);
         Task<Result> UpdateUserProfileAsync(string Id, UpdateProfileRequest request);
         Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken);
+        Task<IEnumerable<UserResponse>> GetAllAsync();
+
     }
 }

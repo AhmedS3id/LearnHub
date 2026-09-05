@@ -2,19 +2,29 @@
 using LearnHub_Api.Contracts.User;
 using Microsoft.AspNetCore.Mvc;
 
-[ApiController]
-[Route("users")]
-public class UserManagementController(
-    IUserService userService) : ControllerBase
+namespace LearnHub_Api.Controllers
 {
-    private readonly IUserService _userService = userService;
-
-    [HttpPut("{userId}/role")]
+    [ApiController]
+    [Route("users")]
     [Authorize(Roles = DefaultRoles.Admin)]
-    public async Task<IActionResult> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest Role, CancellationToken cancellationToken)
+    public class UserManagementController(
+        IUserService userService) : ControllerBase
     {
-        var result = await _userService.ChangeRoleAsync(userId, Role, cancellationToken);
+        private readonly IUserService _userService = userService;
 
-        return result.IsSuccess ? NoContent() : result.ToProblem();
+        [HttpPut("{userId}/role")]
+        public async Task<IActionResult> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest Role, CancellationToken cancellationToken)
+        {
+            var result = await _userService.ChangeRoleAsync(userId, Role, cancellationToken);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [Route("")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var result = await _userService.GetAllAsync();
+
+            return Ok(result);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using LearnHub_Api.Abstractions.Consts;
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Data;
@@ -63,8 +64,17 @@ namespace LearnHub_Api.Services
             if (!user.EmailConfirmed)
                 return Result.Failure<AuthResponse>(UserErrors.EmailNotConfirmed);
 
-            if (!await _UserManager.CheckPasswordAsync(user, request.Password))
+            if (await _UserManager.IsLockedOutAsync(user))
+                return Result.Failure<AuthResponse>(UserErrors.UserLockedOut);
+
+            var isValidPassword = await _UserManager.CheckPasswordAsync(user, request.Password);
+            if (!isValidPassword)
+            {
+                await _UserManager.AccessFailedAsync(user); // يزوّد العداد ويقفل الحساب لو وصل الحد
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
+            }
+
+            await _UserManager.ResetAccessFailedCountAsync(user); // يصفّر العداد بعد نجاح
 
             var (userRoles, Permission) = await GetRolesAndPermission(user, cancellationToken);
 
