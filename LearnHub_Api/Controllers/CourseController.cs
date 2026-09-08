@@ -1,4 +1,5 @@
 ﻿using LearnHub_Api.Authentication.Filter;
+using LearnHub_Api.Common;
 using LearnHub_Api.Contracts.Course;
 using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
@@ -21,9 +22,9 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("")]
         [HasPermission(Permissions.GetCourses)]
-        public async Task<IActionResult> GetAll( CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter, CancellationToken cancellationToken)
         {
-            var result = await _courseService.GetAllAsync( cancellationToken);
+            var result = await _courseService.GetAllAsync( filter,cancellationToken);
             return Ok(result);
         }
         [HttpGet("category/{id}")]

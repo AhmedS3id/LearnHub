@@ -35,7 +35,21 @@ namespace LearnHub_Api.Services
                               g.Key.IsDisabled,
                               g.Select(x => x.Name!).ToList()
                          ));
-            var users = await PaginatedList<UserResponse>.CreateAsync(query, filter.PageNumber, filter.PageSize);
+            if (!string.IsNullOrWhiteSpace(filter.SearchValue))
+            {
+                var search = filter.SearchValue.Trim();
+
+                query = query.Where(x =>
+                    x.FirstName.Contains(search) ||
+                    x.LastName.Contains(search) ||
+                    x.Email.Contains(search));
+            }
+
+            var users = await PaginatedList<UserResponse>.CreateAsync(
+                query,
+                filter.PageNumber,
+                filter.PageSize);
+
             return Result.Success(users);
         }
 

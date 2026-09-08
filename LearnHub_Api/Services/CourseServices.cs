@@ -1,4 +1,5 @@
-﻿using LearnHub_Api.Contracts.Course;
+﻿using LearnHub_Api.Common;
+using LearnHub_Api.Contracts.Course;
 using LearnHub_Api.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
 namespace LearnHub_Api.Services
@@ -47,9 +48,11 @@ namespace LearnHub_Api.Services
             return Result.Success(response);
         }
 
-        public async Task<IEnumerable<CourseResponse>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<CourseResponse>> GetAllAsync(RequestFilter filter, CancellationToken cancellationToken)
         {
-            const string cacheKey = "courses:all";
+            var search = filter.SearchValue.Trim();
+
+            var cacheKey = $"courses:search:{search.ToLowerInvariant()}";
 
             var options = new HybridCacheEntryOptions
             {
@@ -58,12 +61,24 @@ namespace LearnHub_Api.Services
             };
 
             return await _hybridCache.GetOrCreateAsync(
-                    cacheKey,
-                    async cancellationToken =>
-                    await _context.Courses
-                    .AsNoTracking()
-                    .ProjectToType<CourseResponse>()
-                    .ToListAsync(cancellationToken),cancellationToken: cancellationToken);
+                cacheKey,
+                async cancellationToken =>
+                {
+                    var query = _context.Courses
+                        .AsNoTracking();
+
+                    if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        query = query.Where(x =>
+                            x.Title.Contains(search));
+                    }
+
+                    return await query
+                        .ProjectToType<CourseResponse>()
+                        .ToListAsync(cancellationToken);
+                },
+                options,
+                cancellationToken: cancellationToken);
         }
 
         public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId,CancellationToken cancellationToken)
