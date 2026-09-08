@@ -25,7 +25,7 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _userService.GetAllAsync(filter,cancellationToken);
 
-            return Ok(result);
+            return Ok(result.Value);
         }
         [Route("{userId}")]
         public async Task<IActionResult> GetById([FromRoute]string userId,CancellationToken cancellationToken)

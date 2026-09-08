@@ -1,4 +1,6 @@
-﻿using LearnHub_Api.Contracts.Review;
+﻿using LearnHub_Api.Abstractions;
+using LearnHub_Api.Common;
+using LearnHub_Api.Contracts.Review;
 using LearnHub_Api.Entities;
 using LearnHub_Api.Extensions;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -55,7 +57,10 @@ namespace LearnHub_Api.Services
 
             return Result.Success(response);
         }
-        public async Task<Result<IEnumerable<ReviewResponse>>>GetAllReviewsAsync(int courseId, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedList<ReviewResponse>>> GetAllReviewsAsync(
+    int courseId,
+    RequestFilter filter,
+    CancellationToken cancellationToken)
         {
             var course = await _context.Courses
                 .Where(x => x.Id == courseId)
@@ -63,12 +68,10 @@ namespace LearnHub_Api.Services
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (course is null)
-                return Result.Failure <IEnumerable<ReviewResponse>>(CourseErrors.NotFound);
+                return Result.Failure<PaginatedList<ReviewResponse>>(
+                    CourseErrors.NotFound);
 
-            var cashKey=$"course: { courseId}:reviews";
-
-            var reviews = await _hybridCache.GetOrCreateAsync(cashKey, async cancellationToken =>
-                await _context.Reviews
+            var query = _context.Reviews
                 .AsNoTracking()
                 .Where(x => x.CourseId == courseId)
                 .Select(x => new ReviewResponse(
@@ -78,9 +81,14 @@ namespace LearnHub_Api.Services
                     x.Comment,
                     x.Rating,
                     x.CreatedOn
-                )).ToListAsync(cancellationToken), cancellationToken: cancellationToken);
+                ));
 
-            return Result.Success<IEnumerable<ReviewResponse>>(reviews);
+            var reviews = await PaginatedList<ReviewResponse>.CreateAsync(
+                query,
+                filter.PageNumber,
+                filter.PageSize);
+
+            return Result.Success(reviews);
         }
 
         public async Task<Result> UpdateAsync(int reviewId, ReviewRequest request, CancellationToken cancellationToken)

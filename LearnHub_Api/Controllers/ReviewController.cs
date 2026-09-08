@@ -1,4 +1,5 @@
 ﻿using LearnHub_Api.Authentication.Filter;
+using LearnHub_Api.Common;
 using LearnHub_Api.Contracts.Review;
 using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,12 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("course/{courseId}")]
         [HasPermission(Permissions.GetReviews)]
-        public async Task<IActionResult> GetAllReviews([FromRoute] int courseId,CancellationToken cancellationToken)
+
+        [HttpGet("")]
+        public async Task<IActionResult> GetAllReviews(int courseId,[FromQuery] RequestFilter filter,CancellationToken cancellationToken)
         {
-            var result = await _reviewService.GetAllReviewsAsync(courseId,cancellationToken);
+            var result = await _reviewService.GetAllReviewsAsync(courseId,filter,cancellationToken);
+
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPut("{reviewId}")]
