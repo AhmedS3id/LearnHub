@@ -38,5 +38,6 @@ namespace LearnHub_Api.Controllers
             var result = await _userService.UpdateUserProfileAsync(User.GetUserId()!, request);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
+
     }
 }

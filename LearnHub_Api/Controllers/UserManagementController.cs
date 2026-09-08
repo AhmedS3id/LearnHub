@@ -41,5 +41,12 @@ namespace LearnHub_Api.Controllers
             var result = await _userService.UpdateAsync(id, request);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
+
+        [HttpPut("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleStatus([FromRoute] string id)
+        {
+            var result = await _userService.ToggleStatus(id);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }

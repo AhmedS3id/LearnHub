@@ -16,14 +16,6 @@
                 .NotEmpty()
                 .Length(3, 200);
 
-            RuleFor(x => x.Roles)
-                .NotEmpty()
-                .NotNull();
-
-            RuleFor(x => x.Roles)
-                .Must(x => x.Distinct().Count() == x.Count)
-                .WithMessage("You can't duplicated roles to the same user")
-                .When(x => x.Roles != null);
         }
     }
 }

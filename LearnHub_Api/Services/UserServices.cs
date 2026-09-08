@@ -88,10 +88,6 @@ namespace LearnHub_Api.Services
             if (isEmailExist)
                 return Result.Failure<UserResponse>(UserErrors.UserNotFound);
 
-            var ValidRolls = await _context.Roles.Select(x => x.Name).ToListAsync();
-            if (request.Roles.Except(ValidRolls).Any())
-                return Result.Failure<UserResponse>(UserErrors.RoleNotFound);
-
             if (await _userManager.FindByIdAsync(id) is not { } user)
                 return Result.Failure<UserResponse>(UserErrors.UserNotFound);
 
@@ -101,32 +97,27 @@ namespace LearnHub_Api.Services
 
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
-            {
-                await _context.UserRoles
-                    .Where(x => x.UserId == id)
-                    .ExecuteDeleteAsync();
-                await _userManager.AddToRolesAsync(user, request.Roles);
                 return Result.Success();
-            }
+
             var error = result.Errors.FirstOrDefault();
             return Result.Failure(new Error(error!.Code, error.Description, StatusCodes.Status400BadRequest));
         }
 
-        public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken)
+        public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest request,CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
                 return Result.Failure(UserErrors.UserNotFound);
 
-            if (role.Role != DefaultRoles.Member &&
-                role.Role != DefaultRoles.Instructor &&
-                role.Role != DefaultRoles.Admin)
+            if (request.Role != DefaultRoles.Member &&
+                request.Role != DefaultRoles.Instructor &&
+                request.Role != DefaultRoles.Admin)
             {
                 return Result.Failure(UserErrors.RoleNotFound);
             }
 
-            if (await _userManager.IsInRoleAsync(user, role.Role))
+            if (await _userManager.IsInRoleAsync(user, request.Role))
                 return Result.Failure(UserErrors.AlreadyInRole);
 
             await using var transaction =
@@ -152,7 +143,7 @@ namespace LearnHub_Api.Services
                     }
                 }
 
-                var addResult =await _userManager.AddToRoleAsync(user, role.Role);
+                var addResult =await _userManager.AddToRoleAsync(user, request.Role);
 
                 if (!addResult.Succeeded)
                 {
@@ -183,6 +174,23 @@ namespace LearnHub_Api.Services
             //await _userManager.UpdateAsync(user!);
 
             return Result.Success();
+        }
+
+        public async Task<Result> ToggleStatus(string id)
+        {
+            if (await _userManager.FindByIdAsync(id) is not { } user)
+                return Result.Failure(UserErrors.UserNotFound);
+
+            user.IsDisabled = !user.IsDisabled;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+                return Result.Success();
+
+            var error = result.Errors.First();
+
+            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
         }
     }
 }
