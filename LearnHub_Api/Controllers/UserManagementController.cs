@@ -48,5 +48,11 @@ namespace LearnHub_Api.Controllers
             var result = await _userService.ToggleStatus(id);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
+        [HttpPut("{id}/unlock")]
+        public async Task<IActionResult> Unlock([FromRoute] string id)
+        {
+            var result = await _userService.UnlockAcc(id);
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace LearnHub_Api.Services
         Task<Result> UpdateUserProfileAsync(string Id, UpdateProfileRequest request);
         Task<Result> UpdateAsync(string id, UpdateUserRequest request);
         Task<Result> ToggleStatus(string id);
+        Task<Result> UnlockAcc(string id);
         Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken);
         Task<Result<UserResponse>> GetByIdAsync(string id);
         Task<IEnumerable<UserResponse>> GetAllAsync();
