@@ -1,4 +1,6 @@
-﻿using LearnHub_Api.Contracts.User;
+﻿using LearnHub_Api.Abstractions;
+using LearnHub_Api.Common;
+using LearnHub_Api.Contracts.User;
 
 namespace LearnHub_Api.Services
 {
@@ -12,7 +14,7 @@ namespace LearnHub_Api.Services
         Task<Result> UnlockAcc(string id);
         Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken);
         Task<Result<UserResponse>> GetByIdAsync(string id);
-        Task<IEnumerable<UserResponse>> GetAllAsync();
+        Task<Result<PaginatedList<UserResponse>>> GetAllAsync(RequestFilter filter, CancellationToken cancellationToken);
 
     }
 }

@@ -1,7 +1,6 @@
 ﻿using LearnHub_Api.Abstractions.Consts;
-using LearnHub_Api.Authentication.Filter;
+using LearnHub_Api.Common;
 using LearnHub_Api.Contracts.User;
-using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -22,9 +21,9 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
         [Route("")]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter,CancellationToken cancellationToken)
         {
-            var result = await _userService.GetAllAsync();
+            var result = await _userService.GetAllAsync(filter,cancellationToken);
 
             return Ok(result);
         }
