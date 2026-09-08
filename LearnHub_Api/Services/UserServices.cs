@@ -82,6 +82,36 @@ namespace LearnHub_Api.Services
             return Result.Success(user);
         }
 
+        public async Task<Result> UpdateAsync(string id, UpdateUserRequest request)
+        {
+            var isEmailExist = await _userManager.Users.AnyAsync(x => x.Email == request.Email && x.Id != id);
+            if (isEmailExist)
+                return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+
+            var ValidRolls = await _context.Roles.Select(x => x.Name).ToListAsync();
+            if (request.Roles.Except(ValidRolls).Any())
+                return Result.Failure<UserResponse>(UserErrors.RoleNotFound);
+
+            if (await _userManager.FindByIdAsync(id) is not { } user)
+                return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+
+            user = request.Adapt(user);
+            user.UserName = request.Email;
+            user.NormalizedUserName = request.Email.ToUpper();
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                await _context.UserRoles
+                    .Where(x => x.UserId == id)
+                    .ExecuteDeleteAsync();
+                await _userManager.AddToRolesAsync(user, request.Roles);
+                return Result.Success();
+            }
+            var error = result.Errors.FirstOrDefault();
+            return Result.Failure(new Error(error!.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+
         public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest role,CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId);

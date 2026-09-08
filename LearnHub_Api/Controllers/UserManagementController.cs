@@ -1,5 +1,7 @@
 ﻿using LearnHub_Api.Abstractions.Consts;
+using LearnHub_Api.Authentication.Filter;
 using LearnHub_Api.Contracts.User;
+using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -31,6 +33,12 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _userService.GetByIdAsync(userId);
 
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateUserRequest request)
+        {
+            var result = await _userService.UpdateAsync(id, request);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }
