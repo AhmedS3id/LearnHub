@@ -62,32 +62,34 @@ namespace LearnHub_Api
                .AddHangfire(Options => Options.MinimumAvailableServers = 1)
                .AddCheck<MailProviderHealthCheck>(name: "Mail Services");
 
-            services.AddRateLimiter(RLOption =>
+            services.AddRateLimiter(options =>
             {
-                RLOption.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-                RLOption.AddPolicy("ipLimit", httpContext =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 2,
-                        Window = TimeSpan.FromSeconds(20)
-                    }
-                ));
-                RLOption.AddPolicy("userLimit", httpContext =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: httpContext.User.GetUserId(),
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 2,
-                        Window = TimeSpan.FromSeconds(20)
-                    }
-                ));
-                RLOption.AddConcurrencyLimiter("concurrency", option =>
+                options.AddPolicy("ipLimit", httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0
+                        }));
+
+                options.AddPolicy("userLimit", httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.User.GetUserId() ?? "anonymous",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 200,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0
+                        }));
+
+                options.AddConcurrencyLimiter("concurrency", option =>
                 {
-                    option.PermitLimit = 2;
-                    option.QueueLimit = 1;
+                    option.PermitLimit = 10;
+                    option.QueueLimit = 5;
                     option.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
                 });
             });

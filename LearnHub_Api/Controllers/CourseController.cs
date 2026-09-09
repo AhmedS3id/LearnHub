@@ -3,6 +3,7 @@ using LearnHub_Api.Common;
 using LearnHub_Api.Contracts.Course;
 using LearnHub_API.Abstractions.Consts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LearnHub_Api.Controllers
 {
@@ -22,6 +23,7 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("")]
         [HasPermission(Permissions.GetCourses)]
+        [EnableRateLimiting("userLimit")]
         public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter, CancellationToken cancellationToken)
         {
             var result = await _courseService.GetAllAsync( filter,cancellationToken);
@@ -29,6 +31,7 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("category/{id}")]
         [HasPermission(Permissions.GetCourses)]
+        [EnableRateLimiting("userLimit")]
         public async Task<IActionResult> GetByCategory([FromRoute]int id,CancellationToken cancellationToken)
         {
             var result = await _courseService.GetByCategoryAsync(id, cancellationToken);
@@ -37,6 +40,7 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("{id}")]
         [HasPermission(Permissions.GetCourses)]
+        [EnableRateLimiting("userLimit")]
         public async Task< IActionResult> GetById([FromRoute] int id ,CancellationToken cancellationToken)
         {
             var result = await _courseService.GetByIdAsync(id, cancellationToken);

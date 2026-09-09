@@ -2,6 +2,7 @@
 using LearnHub_Api.Common;
 using LearnHub_Api.Contracts.User;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LearnHub_Api.Controllers
 {
@@ -21,6 +22,7 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
         [Route("")]
+        [EnableRateLimiting("userLimit")]
         public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter,CancellationToken cancellationToken)
         {
             var result = await _userService.GetAllAsync(filter,cancellationToken);
@@ -28,6 +30,7 @@ namespace LearnHub_Api.Controllers
             return Ok(result.Value);
         }
         [Route("{userId}")]
+        [EnableRateLimiting("userLimit")]
         public async Task<IActionResult> GetById([FromRoute]string userId,CancellationToken cancellationToken)
         {
             var result = await _userService.GetByIdAsync(userId);

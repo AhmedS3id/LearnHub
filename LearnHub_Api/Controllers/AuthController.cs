@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LearnHub_Api.Controllers
 {
@@ -11,6 +12,7 @@ namespace LearnHub_Api.Controllers
         private readonly ILogger<AuthController> _logger = logger;
 
         [HttpPost("register")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request,CancellationToken cancellationToken)
         {
             var result = await _authServices.RegisterAsync(request, cancellationToken);
@@ -24,6 +26,7 @@ namespace LearnHub_Api.Controllers
         }
 
         [HttpPost("")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request,CancellationToken cancellationToken)
         {
             _logger.LogInformation("Logging with Email : {email} and Password : {password}", request.Email, request.Password);
@@ -35,6 +38,7 @@ namespace LearnHub_Api.Controllers
                 : result.ToProblem();
         }
         [HttpPost("refresh")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
             var result = await _authServices.GetRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
@@ -64,6 +68,7 @@ namespace LearnHub_Api.Controllers
         }
 
         [HttpPost("resend-email-confirm")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationEmailRequest request)
         {
             var Result = await _authServices.ResendConfirmationEmail(request);
@@ -71,6 +76,7 @@ namespace LearnHub_Api.Controllers
             return Result.IsSuccess ? Ok() : Result.ToProblem();
         }
         [HttpPost("forget-password")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> ForgetPassword([FromBody]ForgetPasswordRequest email)
         {
             var Result = await _authServices.ForgetPasswordAsync(email);
