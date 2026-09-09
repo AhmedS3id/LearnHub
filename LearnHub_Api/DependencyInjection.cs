@@ -1,6 +1,7 @@
 ﻿using FluentValidation.AspNetCore;
 using Hangfire;
 using LearnHub_Api.Authentication;
+using LearnHub_Api.Health;
 using LearnHub_Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -55,7 +56,9 @@ namespace LearnHub_Api
 
             services.AddHealthChecks()
                .AddSqlServer(ConnectionString)
-               .AddHangfire(Options => Options.MinimumAvailableServers = 1);
+               .AddHangfire(Options => Options.MinimumAvailableServers = 1)
+               .AddCheck<MailProviderHealthCheck>(name: "Mail Services");
+
 
             return services;
         }

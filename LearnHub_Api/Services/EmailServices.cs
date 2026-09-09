@@ -32,7 +32,8 @@ namespace LearnHub_Api.Services
 
 
             // ✅ تعديل 1 — تجاهل الـ SSL Certificate
-            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+            //smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+            smtp.CheckCertificateRevocation = false;
 
             // ✅ تعديل 2 — تغيير StartTls لـ StartTlsWhenAvailable
             await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable);
