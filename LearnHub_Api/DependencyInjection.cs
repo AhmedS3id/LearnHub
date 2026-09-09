@@ -53,6 +53,10 @@ namespace LearnHub_Api
             services.AddAuthConfig(configuration);
             services.AddBackgroundJobsConfig(configuration);
 
+            services.AddHealthChecks()
+               .AddSqlServer(ConnectionString)
+               .AddHangfire(Options => Options.MinimumAvailableServers = 1);
+
             return services;
         }
 
