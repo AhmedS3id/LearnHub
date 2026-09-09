@@ -1,12 +1,15 @@
 ﻿using FluentValidation.AspNetCore;
 using Hangfire;
 using LearnHub_Api.Authentication;
+using LearnHub_Api.Extensions;
 using LearnHub_Api.Health;
 using LearnHub_Api.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
 
 namespace LearnHub_Api
 {
@@ -58,6 +61,36 @@ namespace LearnHub_Api
                .AddSqlServer(ConnectionString)
                .AddHangfire(Options => Options.MinimumAvailableServers = 1)
                .AddCheck<MailProviderHealthCheck>(name: "Mail Services");
+
+            services.AddRateLimiter(RLOption =>
+            {
+                RLOption.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                RLOption.AddPolicy("ipLimit", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromSeconds(20)
+                    }
+                ));
+                RLOption.AddPolicy("userLimit", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.User.GetUserId(),
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        Window = TimeSpan.FromSeconds(20)
+                    }
+                ));
+                RLOption.AddConcurrencyLimiter("concurrency", option =>
+                {
+                    option.PermitLimit = 2;
+                    option.QueueLimit = 1;
+                    option.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                });
+            });
 
 
             return services;

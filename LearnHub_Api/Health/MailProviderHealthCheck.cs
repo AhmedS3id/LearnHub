@@ -22,9 +22,9 @@ namespace LearnHub_Api.Health
                 smtp.CheckCertificateRevocation = false;
 
                 // ✅ تعديل 2 — تغيير StartTls لـ StartTlsWhenAvailable
-                await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
+                //await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable, cancellationToken);
                 //  دى لازم على ال production
-                //   smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
+                smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls, cancellationToken);
                 smtp.Authenticate(_mailSetting.Mail, _mailSetting.Password, cancellationToken);
 
                 return await Task.FromResult(HealthCheckResult.Healthy());

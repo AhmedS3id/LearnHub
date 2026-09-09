@@ -36,10 +36,11 @@ namespace LearnHub_Api.Services
             smtp.CheckCertificateRevocation = false;
 
             // ✅ تعديل 2 — تغيير StartTls لـ StartTlsWhenAvailable
-            await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable);
-            _logger.LogInformation("Sending email to :{email}", email);
+            //await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTlsWhenAvailable);
             //  دى لازم على ال production
-            //   smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
+            smtp.Connect(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
+            _logger.LogInformation("Sending email to :{email}", email);
+
             smtp.Authenticate(_mailSetting.Mail, _mailSetting.Password);
             await smtp.SendAsync(message);
             smtp.Disconnect(true);
