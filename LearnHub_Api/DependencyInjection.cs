@@ -94,6 +94,17 @@ namespace LearnHub_Api
                 });
             });
 
+            //services.AddApiVersioning(option =>
+            //{
+            //    option.DefaultApiVersion = new ApiVersion(1, 0);
+            //    option.AssumeDefaultVersionWhenUnspecified = true;
+            //    option.ReportApiVersions = true;
+            //    option.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+            //}).AddApiExplorer(option =>
+            //{
+            //    option.GroupNameFormat = "'v'V";
+            //    option.SubstituteApiVersionInUrl = true;
+            //});
 
             return services;
         }

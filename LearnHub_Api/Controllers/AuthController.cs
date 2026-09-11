@@ -8,7 +8,7 @@ namespace LearnHub_Api.Controllers
     public class AuthController(IAuthService authServices, ILogger<AuthController> logger) : ControllerBase
     {
 
-            private readonly IAuthService _authServices = authServices;
+        private readonly IAuthService _authServices = authServices;
         private readonly ILogger<AuthController> _logger = logger;
 
         [HttpPost("register")]
@@ -33,9 +33,7 @@ namespace LearnHub_Api.Controllers
 
             var result = await _authServices.LoginAsync(request, cancellationToken);
 
-            return result.IsSuccess
-                ? Ok(result.Value)
-                : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPost("refresh")]
         [EnableRateLimiting("ipLimit")]
@@ -43,18 +41,14 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _authServices.GetRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
 
-            return result.IsSuccess
-                ? Ok(result.Value)
-                : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPost("logout")]
         public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
             var result = await _authServices.RevokeRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
 
-            return result.IsSuccess
-                ? Ok()
-                : result.ToProblem();
+            return result.IsSuccess ? Ok() : result.ToProblem();
         }
 
         [HttpPost("confirm-email")]
@@ -62,9 +56,7 @@ namespace LearnHub_Api.Controllers
         {
             var result = await _authServices.ConfirmationEmail(request);
 
-            return result.IsSuccess
-                ? Ok()
-                : result.ToProblem();
+            return result.IsSuccess ? Ok() : result.ToProblem();
         }
 
         [HttpPost("resend-email-confirm")]
