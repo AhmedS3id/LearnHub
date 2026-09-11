@@ -14,17 +14,16 @@ namespace LearnHub_Api.Services
             if (course is null)
                 return Result.Failure<SectionResponse>(CourseErrors.NotFound);
 
-            var instructorId = _httpContextAccessor.HttpContext!
-                .User
-                .GetUserId();
+            var user = _httpContextAccessor.HttpContext!.User;
+            var instructorId = user.GetUserId();
 
-            if (course.InstructorId != instructorId)
+            if (course.InstructorId != instructorId && !user.IsAdmin())
                 return Result.Failure<SectionResponse>(
                     SectionErrors.Unauthorized);
 
             var sectionOrderExists = await _context.Sections
-                .AnyAsync(x =>x.CourseId == courseId
-                && x.Order==request.Order, cancellationToken);
+                .AnyAsync(x => x.CourseId == courseId
+                && x.Order == request.Order, cancellationToken);
             if (sectionOrderExists)
                 return Result.Failure<SectionResponse>(SectionErrors.DuplicatedOrder);
 
@@ -45,13 +44,13 @@ namespace LearnHub_Api.Services
         {
             var courseExists = await _context.Courses
               .AnyAsync(x => x.Id == courseId, cancellationToken);
-            if (!courseExists )
+            if (!courseExists)
                 return Result.Failure<IEnumerable<SectionResponse>>(CourseErrors.NotFound);
 
             var response = await _context.Sections
                 .AsNoTracking()
-                .Where(x=>x.CourseId == courseId)
-                .OrderBy(x=>x.Order)
+                .Where(x => x.CourseId == courseId)
+                .OrderBy(x => x.Order)
                 .ProjectToType<SectionResponse>()
                 .ToListAsync(cancellationToken);
 
@@ -79,21 +78,20 @@ namespace LearnHub_Api.Services
 
         public async Task<Result> UpdateAsync(int courseId, int sectionId, SectionRequest request, CancellationToken cancellationToken)
         {
-    //        var section = await _context.Sections
-    //          .Include(x => x.Course)
-    //          .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
-    //        if (section is null)
-    //            return Result.Failure(SectionErrors.NotFound);
+            //        var section = await _context.Sections
+            //          .Include(x => x.Course)
+            //          .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
+            //        if (section is null)
+            //            return Result.Failure(SectionErrors.NotFound);
 
             var course = await _context.Courses
                 .FindAsync([courseId], cancellationToken);
             if (course is null)
                 return Result.Failure(CourseErrors.NotFound);
 
-            var instructorId = _httpContextAccessor.HttpContext!
-                .User
-                .GetUserId();
-            if (course.InstructorId != instructorId)
+            var user = _httpContextAccessor.HttpContext!.User;
+            var instructorId = user.GetUserId();
+            if (course.InstructorId != instructorId && !user.IsAdmin())
                 return Result.Failure(SectionErrors.Unauthorized);
 
             var section = await _context.Sections
@@ -121,11 +119,10 @@ namespace LearnHub_Api.Services
             if (course is null)
                 return Result.Failure(CourseErrors.NotFound);
 
-            var instructorId = _httpContextAccessor.HttpContext!
-                .User
-                .GetUserId();
+            var user = _httpContextAccessor.HttpContext!.User;
+            var instructorId = user.GetUserId();
 
-            if (course.InstructorId != instructorId)
+            if (course.InstructorId != instructorId && !user.IsAdmin())
                 return Result.Failure(
                     SectionErrors.Unauthorized);
 

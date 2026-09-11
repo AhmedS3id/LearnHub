@@ -21,21 +21,21 @@ namespace LearnHub_Api.Controllers
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-        [Route("")]
+        [HttpGet("")]
         [EnableRateLimiting("userLimit")]
-        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter,CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter, CancellationToken cancellationToken)
         {
-            var result = await _userService.GetAllAsync(filter,cancellationToken);
+            var result = await _userService.GetAllAsync(filter, cancellationToken);
 
             return Ok(result.Value);
         }
-        [Route("{userId}")]
+        [HttpGet("{userId}")]
         [EnableRateLimiting("userLimit")]
-        public async Task<IActionResult> GetById([FromRoute]string userId,CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById([FromRoute] string userId, CancellationToken cancellationToken)
         {
             var result = await _userService.GetByIdAsync(userId);
 
-            return result.IsSuccess ? NoContent() : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] string id, [FromBody] UpdateUserRequest request)

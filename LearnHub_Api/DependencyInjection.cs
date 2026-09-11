@@ -1,6 +1,7 @@
 ﻿using FluentValidation.AspNetCore;
 using Hangfire;
 using LearnHub_Api.Authentication;
+using LearnHub_Api.Authentication.Filter;
 using LearnHub_Api.Extensions;
 using LearnHub_Api.Health;
 using LearnHub_Api.Settings;
@@ -137,6 +138,11 @@ namespace LearnHub_Api
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+
+            services.AddAuthorization();
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             services.AddAuthentication(static option =>
             {
