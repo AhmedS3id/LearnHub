@@ -14,16 +14,16 @@ namespace LearnHub_Api.Controllers
         private readonly IReviewService _reviewService = reviewService;
 
         [HttpPost("course/{courseId}")]
-        public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] ReviewRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] ReviewRequest request,CancellationToken cancellationToken)
         {
-            var result = await _reviewService.CreateAsync(courseId, request, cancellationToken);
+            var result = await _reviewService.CreateAsync(courseId,request,cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpGet("course/{courseId}")]
         [HasPermission(Permissions.GetReviews)]
-        public async Task<IActionResult> GetAllReviews([FromRoute] int courseId, [FromQuery] RequestFilter filter, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllReviews([FromRoute] int courseId,[FromQuery] RequestFilter filter,CancellationToken cancellationToken)
         {
-            var result = await _reviewService.GetAllReviewsAsync(courseId, filter, cancellationToken);
+            var result = await _reviewService.GetAllReviewsAsync(courseId,filter,cancellationToken);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }

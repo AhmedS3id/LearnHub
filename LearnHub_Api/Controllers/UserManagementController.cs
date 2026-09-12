@@ -23,15 +23,15 @@ namespace LearnHub_Api.Controllers
         }
         [HttpGet("")]
         [EnableRateLimiting("userLimit")]
-        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter,CancellationToken cancellationToken)
         {
-            var result = await _userService.GetAllAsync(filter, cancellationToken);
+            var result = await _userService.GetAllAsync(filter,cancellationToken);
 
             return Ok(result.Value);
         }
         [HttpGet("{userId}")]
         [EnableRateLimiting("userLimit")]
-        public async Task<IActionResult> GetById([FromRoute] string userId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById([FromRoute]string userId,CancellationToken cancellationToken)
         {
             var result = await _userService.GetByIdAsync(userId);
 

@@ -3,16 +3,16 @@
     public static class DefaultRoles
     {
         public const string Admin = nameof(Admin);
-        public const string AdminRoleId = "01a091c7-7e6b-7829-9551-3f0bda1a579f";
-        public const string AdminRoleConcurrencyStamp = "01a091c7-7e6b-76d0-abeb-042d14a3dae7";
+        public const string AdminRoleId = "01a095ed-eff4-7d35-917c-b136c6dec33f";
+        public const string AdminRoleConcurrencyStamp = "01a095ed-eff4-798c-93e9-02ebcf95f00b";
 
         public const string Instructor = nameof(Instructor);
-        public const string InstructorRoleId = "01a091c7-7e6b-729b-be98-1a6597a86216";
-        public const string InstructorRoleConcurrencyStamp = "01a091c7-7e6b-7d43-ad53-cef58e434266";
+        public const string InstructorRoleId = "01a095ed-eff4-7f1e-9b09-951b5cafecde";
+        public const string InstructorRoleConcurrencyStamp = "01a095ed-eff4-76fd-bc6a-6b2661ccb43d";
 
         public const string Member = nameof(Member);
-        public const string MemberRoleId = "01a091c7-7e6b-73d8-96e4-0224784a28f4";
-        public const string MemberRoleConcurrencyStamp = "01a091c7-7e6b-7c20-a72e-2f4a8c1c6242";
+        public const string MemberRoleId = "01a095ed-eff4-708d-94d3-fcd6dda415e4";
+        public const string MemberRoleConcurrencyStamp = "01a095ed-eff4-7872-a394-da5724758a8a";
 
     }
 }

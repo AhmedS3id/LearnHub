@@ -13,7 +13,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpPost("register")]
         [EnableRateLimiting("ipLimit")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request,CancellationToken cancellationToken)
         {
             var result = await _authServices.RegisterAsync(request, cancellationToken);
 
@@ -27,7 +27,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpPost("")]
         [EnableRateLimiting("ipLimit")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request,CancellationToken cancellationToken)
         {
             _logger.LogInformation("Login attempt for {Email}", request.Email);
 
@@ -37,16 +37,16 @@ namespace LearnHub_Api.Controllers
         }
         [HttpPost("refresh")]
         [EnableRateLimiting("ipLimit")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
-            var result = await _authServices.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+            var result = await _authServices.GetRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPost("logout")]
-        public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
-            var result = await _authServices.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+            var result = await _authServices.RevokeRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
 
             return result.IsSuccess ? Ok() : result.ToProblem();
         }
@@ -69,7 +69,7 @@ namespace LearnHub_Api.Controllers
         }
         [HttpPost("forget-password")]
         [EnableRateLimiting("ipLimit")]
-        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequest email)
+        public async Task<IActionResult> ForgetPassword([FromBody]ForgetPasswordRequest email)
         {
             var Result = await _authServices.ForgetPasswordAsync(email);
 

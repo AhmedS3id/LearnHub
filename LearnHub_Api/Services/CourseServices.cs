@@ -12,7 +12,7 @@ namespace LearnHub_Api.Services
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly HybridCache _hybridCache = hybridCache;
 
-        public async Task<Result<CourseResponse>> CreateAsync(CourseRequest request, CancellationToken cancellationToken)
+        public async Task<Result<CourseResponse>> CreateAsync(CourseRequest request,CancellationToken cancellationToken)
         {
             var category = await _context.Categories
                .FindAsync([request.CategoryId], cancellationToken);
@@ -34,7 +34,7 @@ namespace LearnHub_Api.Services
 
             await _context.Courses.AddAsync(course, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync("courses:all", cancellationToken);
+            await _hybridCache.RemoveAsync("courses:all",cancellationToken);
 
             var response = new CourseResponse(
                 course.Id,
@@ -81,7 +81,7 @@ namespace LearnHub_Api.Services
                 cancellationToken: cancellationToken);
         }
 
-        public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId,CancellationToken cancellationToken)
         {
 
             var categoryExists = await _context.Categories
@@ -123,7 +123,7 @@ namespace LearnHub_Api.Services
                 return Result.Failure(CategoryErrors.NotFound);
 
             var course = await _context.Courses
-               .FindAsync([courseId], cancellationToken);
+               .FindAsync( [courseId], cancellationToken);
 
             if (course is null)
                 return Result.Failure(CourseErrors.NotFound);
@@ -134,10 +134,10 @@ namespace LearnHub_Api.Services
             if (course.InstructorId != instructorId && !user.IsAdmin())
                 return Result.Failure(CourseErrors.Unauthorized);
 
-            course.Title = request.Title;
-            course.Description = request.Description;
-            course.Price = request.Price;
-            course.CategoryId = request.CategoryId;
+            course.Title= request.Title;
+            course.Description= request.Description;
+            course.Price= request.Price;
+            course.CategoryId= request.CategoryId;
 
             await _context.SaveChangesAsync(cancellationToken);
             await _hybridCache.RemoveAsync("courses:all", cancellationToken);
@@ -147,7 +147,7 @@ namespace LearnHub_Api.Services
         public async Task<Result> DeleteAsync(int courseId, CancellationToken cancellationToken)
         {
             var course = await _context.Courses
-               .FindAsync([courseId], cancellationToken);
+               .FindAsync( [courseId], cancellationToken);
 
             if (course is null)
                 return Result.Failure(CourseErrors.NotFound);
@@ -158,7 +158,7 @@ namespace LearnHub_Api.Services
             if (course.InstructorId != instructorId && !user.IsAdmin())
                 return Result.Failure(CourseErrors.Unauthorized);
 
-            _context.Remove(course);
+             _context.Remove(course); 
             await _context.SaveChangesAsync(cancellationToken);
             await _hybridCache.RemoveAsync("courses:all", cancellationToken);
 

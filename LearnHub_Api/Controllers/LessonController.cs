@@ -1,6 +1,8 @@
 ﻿using LearnHub_Api.Authentication.Filter;
 using LearnHub_Api.Contracts.Lesson;
+using LearnHub_Api.Entities;
 using LearnHub_API.Abstractions.Consts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Controllers
@@ -14,7 +16,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpPost("section/{sectionId}")]
         [HasPermission(Permissions.AddLessons)]
-        public async Task<IActionResult> Create([FromRoute] int sectionId, [FromBody] LessonRequest request,
+        public async Task<IActionResult> Create([FromRoute] int sectionId,[FromBody] LessonRequest request,
             CancellationToken cancellationToken)
         {
             var result = await _lessonService.CreateAsync(sectionId, request, cancellationToken);
@@ -27,7 +29,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpGet("course/{courseId}")]
         [HasPermission(Permissions.GetLessons)]
-        public async Task<IActionResult> GetCourseContent([FromRoute] int courseId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCourseContent([FromRoute] int courseId,CancellationToken cancellationToken)
         {
             var result = await _lessonService.GetCourseContentAsync(courseId, cancellationToken);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
@@ -35,7 +37,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpGet("section/{sectionId}/lesson/{lessonId}")]
         [HasPermission(Permissions.GetLessons)]
-        public async Task<IActionResult> GetById([FromRoute] int sectionId, [FromRoute] int lessonId,
+        public async Task<IActionResult> GetById([FromRoute] int sectionId,[FromRoute] int lessonId,
             CancellationToken cancellationToken)
         {
             var result = await _lessonService.GetByIdAsync(sectionId, lessonId, cancellationToken);
@@ -54,7 +56,7 @@ namespace LearnHub_Api.Controllers
 
         [HttpDelete("section/{sectionId}/lesson/{lessonId}")]
         [HasPermission(Permissions.DeleteLessons)]
-        public async Task<IActionResult> Delete([FromRoute] int sectionId, [FromRoute] int lessonId,
+        public async Task<IActionResult> Delete([FromRoute] int sectionId,[FromRoute] int lessonId,
             CancellationToken cancellationToken)
         {
             var result = await _lessonService.DeleteAsync(sectionId, lessonId, cancellationToken);

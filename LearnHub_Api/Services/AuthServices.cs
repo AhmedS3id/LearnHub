@@ -2,6 +2,7 @@
 using LearnHub_Api.Abstractions.Consts;
 using LearnHub_Api.Authentication;
 using LearnHub_Api.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Data;
@@ -12,7 +13,7 @@ namespace LearnHub_Api.Services
 {
     public class AuthServices(UserManager<ApplicationUser> UserManager,
         ApplicationDbContext context,
-        ILogger<AuthServices> logger,
+        ILogger<AuthServices>logger,
         IJwtProvider jwtProvider,
         IEmailSender emailSender,
         IHttpContextAccessor httpContextAccessor) : IAuthService
@@ -69,11 +70,11 @@ namespace LearnHub_Api.Services
             var isValidPassword = await _UserManager.CheckPasswordAsync(user, request.Password);
             if (!isValidPassword)
             {
-                await _UserManager.AccessFailedAsync(user); 
+                await _UserManager.AccessFailedAsync(user); // يزوّد العداد ويقفل الحساب لو وصل الحد
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
             }
 
-            await _UserManager.ResetAccessFailedCountAsync(user);
+            await _UserManager.ResetAccessFailedCountAsync(user); // يصفّر العداد بعد نجاح
 
             var (userRoles, Permission) = await GetRolesAndPermission(user, cancellationToken);
 
@@ -268,7 +269,7 @@ namespace LearnHub_Api.Services
 
         private static string GenerateRefreshToken()
         {
-            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+             return Convert.ToBase64String (RandomNumberGenerator.GetBytes(64));
         }
 
         private async Task SendForgetPasswordEmail(ApplicationUser user, string code)
@@ -297,15 +298,15 @@ namespace LearnHub_Api.Services
             BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(user.Email!, "✅ LearnHub : Email Confirmation", EmailBody));
             await Task.CompletedTask;
         }
-        private async Task<(IEnumerable<string> Roles, IEnumerable<string> Permission)> GetRolesAndPermission(ApplicationUser user, CancellationToken cancellationToken)
-        {
+         private async Task <(IEnumerable<string> Roles,IEnumerable<string> Permission)> GetRolesAndPermission(ApplicationUser user,CancellationToken cancellationToken)
+        { 
             var userRoles = await _UserManager.GetRolesAsync(user);
 
-            var Permission = await (from r in _context.Roles
-                                    join p in _context.RoleClaims
-                                    on r.Id equals p.RoleId
-                                    where userRoles.Contains(r.Name!)
-                                    select p.ClaimValue)
+            var Permission = await(from r in _context.Roles
+                                join p in _context.RoleClaims
+                                on r.Id equals p.RoleId
+                                where userRoles.Contains(r.Name!)
+                                select p.ClaimValue)
                                 .Distinct()
                                 .ToListAsync(cancellationToken);
             return (userRoles, Permission);

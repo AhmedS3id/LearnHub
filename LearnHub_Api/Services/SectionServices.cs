@@ -22,8 +22,8 @@ namespace LearnHub_Api.Services
                     SectionErrors.Unauthorized);
 
             var sectionOrderExists = await _context.Sections
-                .AnyAsync(x => x.CourseId == courseId
-                && x.Order == request.Order, cancellationToken);
+                .AnyAsync(x =>x.CourseId == courseId
+                && x.Order==request.Order, cancellationToken);
             if (sectionOrderExists)
                 return Result.Failure<SectionResponse>(SectionErrors.DuplicatedOrder);
 
@@ -44,13 +44,13 @@ namespace LearnHub_Api.Services
         {
             var courseExists = await _context.Courses
               .AnyAsync(x => x.Id == courseId, cancellationToken);
-            if (!courseExists)
+            if (!courseExists )
                 return Result.Failure<IEnumerable<SectionResponse>>(CourseErrors.NotFound);
 
             var response = await _context.Sections
                 .AsNoTracking()
-                .Where(x => x.CourseId == courseId)
-                .OrderBy(x => x.Order)
+                .Where(x=>x.CourseId == courseId)
+                .OrderBy(x=>x.Order)
                 .ProjectToType<SectionResponse>()
                 .ToListAsync(cancellationToken);
 
@@ -78,11 +78,11 @@ namespace LearnHub_Api.Services
 
         public async Task<Result> UpdateAsync(int courseId, int sectionId, SectionRequest request, CancellationToken cancellationToken)
         {
-            //        var section = await _context.Sections
-            //          .Include(x => x.Course)
-            //          .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
-            //        if (section is null)
-            //            return Result.Failure(SectionErrors.NotFound);
+    //        var section = await _context.Sections
+    //          .Include(x => x.Course)
+    //          .FirstOrDefaultAsync(x => x.Id == sectionId && x.CourseId == courseId, cancellationToken);
+    //        if (section is null)
+    //            return Result.Failure(SectionErrors.NotFound);
 
             var course = await _context.Courses
                 .FindAsync([courseId], cancellationToken);

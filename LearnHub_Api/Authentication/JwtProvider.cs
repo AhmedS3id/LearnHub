@@ -21,7 +21,7 @@ namespace LearnHub_Api.Authentication
                 new(JwtRegisteredClaimNames.GivenName,user.FirstName),
                 new(JwtRegisteredClaimNames.FamilyName,user.LastName),
                 new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                ..Roles.Select(role => new Claim(ClaimTypes.Role, role)),
+                ..Roles.Select(role => new Claim(ClaimTypes.Role, role)), 
                 new(Permissions.Type,JsonSerializer.Serialize(Permission),JsonClaimValueTypes.JsonArray)
                 ];
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));

@@ -11,7 +11,7 @@ namespace LearnHub_Api.Services
         private readonly ApplicationDbContext _context = context;
 
         public async Task<Result<PaginatedList<UserResponse>>> GetAllAsync(RequestFilter filter, CancellationToken cancellationToken)
-        {
+        { 
             var query = (from u in _context.Users
                          join ur in _context.UserRoles
                          on u.Id equals ur.UserId
@@ -69,14 +69,14 @@ namespace LearnHub_Api.Services
             );
             return Result.Success(Response);
         }
-        public async Task<Result> ChangePasswordAsync(string UserId, ChangePasswordRequest request)
+        public async Task <Result> ChangePasswordAsync(string UserId,ChangePasswordRequest request)
         {
             var user = await _userManager.FindByIdAsync(UserId);
 
             if (user is null)
                 return Result.Failure(UserErrors.UserNotFound);
 
-            var result = await _userManager.ChangePasswordAsync(user!, request.CurrentPassword, request.NewPassword);
+            var result = await _userManager.ChangePasswordAsync(user!, request.CurrentPassword,request.NewPassword);
 
             if (!result.Succeeded)
             {
@@ -125,7 +125,7 @@ namespace LearnHub_Api.Services
             return Result.Failure(new Error(error!.Code, error.Description, StatusCodes.Status400BadRequest));
         }
 
-        public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest request, CancellationToken cancellationToken)
+        public async Task<Result> ChangeRoleAsync(string userId, ChangeRoleRequest request,CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -165,7 +165,7 @@ namespace LearnHub_Api.Services
                     }
                 }
 
-                var addResult = await _userManager.AddToRoleAsync(user, request.Role);
+                var addResult =await _userManager.AddToRoleAsync(user, request.Role);
 
                 if (!addResult.Succeeded)
                 {
