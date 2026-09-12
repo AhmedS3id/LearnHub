@@ -117,6 +117,9 @@ namespace LearnHub_Api.Services
             if (user.IsDisabled)
                 return Result.Failure<AuthResponse>(UserErrors.UserDisabled);
 
+            if (await _UserManager.IsLockedOutAsync(user))
+                return Result.Failure<AuthResponse>(UserErrors.UserLockedOut);
+
             var userRefreshToken = user.RefreshTokens
                 .SingleOrDefault(x => x.Token == RefreshToken);
 
@@ -172,11 +175,11 @@ namespace LearnHub_Api.Services
         public async Task<Result> ForgetPasswordAsync(ForgetPasswordRequest request)
         {
             var user = await _UserManager.FindByEmailAsync(request.Email);
-            if (user is null)
-                return Result.Success();
 
-            if (!user.EmailConfirmed)
-                return Result.Failure(UserErrors.EmailNotConfirmed);
+            // Return success regardless of whether the user exists or has confirmed
+            // their email, to avoid leaking account existence/state to callers.
+            if (user is null || !user.EmailConfirmed)
+                return Result.Success();
 
             var code = await _UserManager.GeneratePasswordResetTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

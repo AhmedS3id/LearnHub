@@ -33,6 +33,12 @@ namespace LearnHub_Api.Services
             if (!isEnrolled)
                 return Result.Failure<ReviewResponse>(ReviewErrors.NotEnrolled);
 
+            var alreadyReviewed = await _context.Reviews.AnyAsync(x => x.CourseId == courseId
+            && x.StudentId == studentId, cancellationToken);
+
+            if (alreadyReviewed)
+                return Result.Failure<ReviewResponse>(ReviewErrors.AlreadyReviewed);
+
             //var studentName = await _context.Users
             //    .Where(x => x.Id == studentId)
             //    .Select(x => x.FirstName + " " + x.LastName)

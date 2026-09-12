@@ -108,7 +108,7 @@ namespace LearnHub_Api.Services
         {
             var isEmailExist = await _userManager.Users.AnyAsync(x => x.Email == request.Email && x.Id != id);
             if (isEmailExist)
-                return Result.Failure<UserResponse>(UserErrors.UserNotFound);
+                return Result.Failure<UserResponse>(UserErrors.EmailAlreadyExists);
 
             if (await _userManager.FindByIdAsync(id) is not { } user)
                 return Result.Failure<UserResponse>(UserErrors.UserNotFound);

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LearnHub_Api.Persistence.EntitiesConfigurations
 {
@@ -11,6 +12,12 @@ namespace LearnHub_Api.Persistence.EntitiesConfigurations
 
             builder.Property(x => x.Rating)
                 .IsRequired();
+
+            builder.HasIndex(x => new
+            {
+                x.StudentId,
+                x.CourseId
+            }).IsUnique();
         }
     }
 }

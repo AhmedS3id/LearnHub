@@ -44,6 +44,7 @@ namespace LearnHub_Api.Controllers
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
         [HttpPost("logout")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
         {
             var result = await _authServices.RevokeRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
@@ -52,6 +53,7 @@ namespace LearnHub_Api.Controllers
         }
 
         [HttpPost("confirm-email")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
         {
             var result = await _authServices.ConfirmationEmail(request);
@@ -77,6 +79,7 @@ namespace LearnHub_Api.Controllers
         }
 
         [HttpPost("reset-password")]
+        [EnableRateLimiting("ipLimit")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             var Result = await _authServices.ResetPasswordAsync(request);

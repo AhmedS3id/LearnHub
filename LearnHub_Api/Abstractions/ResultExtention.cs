@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LearnHub_Api.Consts
 {
@@ -8,10 +9,11 @@ namespace LearnHub_Api.Consts
         {
             if (result.IsSuccess)
                 throw new InvalidOperationException("Can not convert from success result to problem");
-            var Problem = Results.Problem(statusCode: result.Error.StatusCode);
-            var ProblemDetail = Problem.GetType().GetProperty(nameof(ProblemDetails))!.GetValue(Problem) as ProblemDetails;
 
-            ProblemDetail!.Extensions = new Dictionary<string, object?>
+            var problem = (ProblemHttpResult)Results.Problem(statusCode: result.Error.StatusCode);
+            var problemDetail = problem.ProblemDetails;
+
+            problemDetail.Extensions = new Dictionary<string, object?>
             {
 
                 {
@@ -22,7 +24,7 @@ namespace LearnHub_Api.Consts
                 }
             };
 
-            return new ObjectResult(ProblemDetail);
+            return new ObjectResult(problemDetail);
         }
     }
 }

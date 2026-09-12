@@ -14,6 +14,7 @@ namespace LearnHub_Api.Controllers
         private readonly IReviewService _reviewService = reviewService;
 
         [HttpPost("course/{courseId}")]
+        [HasPermission(Permissions.AddReviews)]
         public async Task<IActionResult> Create([FromRoute] int courseId, [FromBody] ReviewRequest request,CancellationToken cancellationToken)
         {
             var result = await _reviewService.CreateAsync(courseId,request,cancellationToken);

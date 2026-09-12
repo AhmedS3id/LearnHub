@@ -34,7 +34,7 @@ namespace LearnHub_Api.Services
 
             await _context.Courses.AddAsync(course, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync("courses:all",cancellationToken);
+            await _hybridCache.RemoveByTagAsync("courses", cancellationToken);
 
             var response = new CourseResponse(
                 course.Id,
@@ -78,6 +78,7 @@ namespace LearnHub_Api.Services
                         .ToListAsync(cancellationToken);
                 },
                 options,
+                tags: ["courses"],
                 cancellationToken: cancellationToken);
         }
 
@@ -140,7 +141,7 @@ namespace LearnHub_Api.Services
             course.CategoryId= request.CategoryId;
 
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync("courses:all", cancellationToken);
+            await _hybridCache.RemoveByTagAsync("courses", cancellationToken);
 
             return Result.Success();
         }
@@ -160,7 +161,7 @@ namespace LearnHub_Api.Services
 
              _context.Remove(course); 
             await _context.SaveChangesAsync(cancellationToken);
-            await _hybridCache.RemoveAsync("courses:all", cancellationToken);
+            await _hybridCache.RemoveByTagAsync("courses", cancellationToken);
 
             return Result.Success();
         }
