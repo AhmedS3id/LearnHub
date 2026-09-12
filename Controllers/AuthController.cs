@@ -1,0 +1,91 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+
+namespace LearnHub_Api.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class AuthController(IAuthService authServices, ILogger<AuthController> logger) : ControllerBase
+    {
+
+        private readonly IAuthService _authServices = authServices;
+        private readonly ILogger<AuthController> _logger = logger;
+
+        [HttpPost("register")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _authServices.RegisterAsync(request, cancellationToken);
+
+            return result.IsSuccess
+                ? Ok(new
+                {
+                    Message = "Registration completed successfully. Please check your email to confirm your account."
+                })
+                : result.ToProblem();
+        }
+
+        [HttpPost("")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request,CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Login attempt for {Email}", request.Email);
+
+            var result = await _authServices.LoginAsync(request, cancellationToken);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPost("refresh")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _authServices.GetRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpPost("logout")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> RevokeRefreshToken([FromBody] RefreshTokenRequest request,CancellationToken cancellationToken)
+        {
+            var result = await _authServices.RevokeRefreshTokenAsync(request.Token,request.RefreshToken, cancellationToken);
+
+            return result.IsSuccess ? Ok() : result.ToProblem();
+        }
+
+        [HttpPost("confirm-email")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+        {
+            var result = await _authServices.ConfirmationEmail(request);
+
+            return result.IsSuccess ? Ok() : result.ToProblem();
+        }
+
+        [HttpPost("resend-email-confirm")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationEmailRequest request)
+        {
+            var Result = await _authServices.ResendConfirmationEmail(request);
+
+            return Result.IsSuccess ? Ok() : Result.ToProblem();
+        }
+        [HttpPost("forget-password")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> ForgetPassword([FromBody]ForgetPasswordRequest email)
+        {
+            var Result = await _authServices.ForgetPasswordAsync(email);
+
+            return Result.IsSuccess ? Ok() : Result.ToProblem();
+        }
+
+        [HttpPost("reset-password")]
+        [EnableRateLimiting("ipLimit")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var Result = await _authServices.ResetPasswordAsync(request);
+
+            return Result.IsSuccess ? Ok() : Result.ToProblem();
+        }
+
+    }
+}
