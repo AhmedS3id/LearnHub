@@ -2,16 +2,19 @@
 
 A backend for an online learning platform, built with **ASP.NET Core Web API**. LearnHub handles the full lifecycle of a course platform — course authoring, structured content, enrollments, and reviews — behind a JWT-secured, permission-based authorization layer, with production-facing concerns (background jobs, health checks, structured logging, rate limiting) built in from the start.
 
-The backend is feature-complete and has been tested locally, and is currently deployed on Monster.
+The backend is feature-complete and has been tested locally.
 
-## Live API
+## API Collection
 
-🔗 **Base URL:** [https://learn-hub.runasp.net](https://learn-hub.runasp.net)
+The API can be explored and tested using the provided Postman collection.
 
-> A frontend for LearnHub is planned (see [Roadmap](#roadmap)); for now, the API can be explored via Postman or any HTTP client.
+📦 [Download / Import the LearnHub Postman Collection](./docs/LearnHub.postman_collection.public.json)
+
+The collection covers the main authentication, users, categories, courses, sections, lessons, enrollments, reviews, admin, and health-check endpoints.
 
 ## Table of Contents
 
+- [API Collection](#api-collection)
 - [Key Features](#key-features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
