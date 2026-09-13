@@ -34,6 +34,7 @@ namespace LearnHub_Api.Services
             // ✅ تعديل 1 — تجاهل الـ SSL Certificate
             //smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
             smtp.CheckCertificateRevocation = false;
+            smtp.LocalDomain = "localhost";
 
             await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls);
             _logger.LogInformation("Sending email to :{email}", email);
