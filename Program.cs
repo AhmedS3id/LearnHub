@@ -40,7 +40,7 @@ app.UseRateLimiter();
 app.UseHangfireDashboard("/jobs", new DashboardOptions
 {
     DashboardTitle = "LearnHub Dashboard",
-    //Authorization = [new HangfireDashboardAuthorizationFilter()]
+    Authorization = [new HangfireDashboardAuthorizationFilter()]
 });
 
 RecurringJob.AddOrUpdate<IRefreshTokenCleanupJob>(

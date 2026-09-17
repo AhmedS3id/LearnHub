@@ -158,7 +158,8 @@ namespace LearnHub_Api
                     ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings?.Key!)),
                     ValidIssuer = JwtSettings?.Issuer,
-                    ValidAudience = JwtSettings?.Audience
+                    ValidAudience = JwtSettings?.Audience,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 

@@ -15,22 +15,23 @@ namespace LearnHub_Api.Health
             try
             {
                 using var smtp = new SmtpClient();
-
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeoutCts.CancelAfter(TimeSpan.FromSeconds(5));
 
                 // ✅ تعديل 1 — تجاهل الـ SSL Certificate
                 //smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 smtp.CheckCertificateRevocation = false;
                 smtp.LocalDomain = "localhost";
 
-                await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls, cancellationToken);
-                await smtp.AuthenticateAsync(_mailSetting.Mail, _mailSetting.Password, cancellationToken);
-                await smtp.DisconnectAsync(true, cancellationToken);
+                await smtp.ConnectAsync(_mailSetting.Host, _mailSetting.Port, SecureSocketOptions.StartTls, timeoutCts.Token);
+                await smtp.AuthenticateAsync(_mailSetting.Mail, _mailSetting.Password, timeoutCts.Token);
+                await smtp.DisconnectAsync(true, timeoutCts.Token);
 
                 return HealthCheckResult.Healthy();
             }
             catch (Exception ex)
             {
-                return await Task.FromResult(HealthCheckResult.Unhealthy(exception: ex));
+                return HealthCheckResult.Unhealthy(exception: ex);
             }
         }
     }

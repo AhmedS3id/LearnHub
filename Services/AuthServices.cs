@@ -149,7 +149,7 @@ namespace LearnHub_Api.Services
 
         public async Task<Result> RevokeRefreshTokenAsync(string Token, string RefreshToken, CancellationToken cancellationToken)
         {
-            var user_Id = _jwtProvider.ValidateToken(Token);
+            var user_Id = _jwtProvider.ValidateExpiredToken(Token);
             if (user_Id is null)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
 

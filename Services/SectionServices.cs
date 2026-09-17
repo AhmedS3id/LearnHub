@@ -1,11 +1,15 @@
 ﻿using LearnHub_Api.Contracts.Section;
 using LearnHub_Api.Extensions;
+using Microsoft.Extensions.Caching.Hybrid;
 namespace LearnHub_Api.Services
 {
-    public class SectionServices(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor) : ISectionService
+    public class SectionServices(ApplicationDbContext context,
+        IHttpContextAccessor httpContextAccessor,
+        HybridCache hybridCache) : ISectionService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly HybridCache _hybridCache = hybridCache;
 
         public async Task<Result<SectionResponse>> CreateAsync(int courseId, SectionRequest request, CancellationToken cancellationToken)
         {
@@ -31,6 +35,7 @@ namespace LearnHub_Api.Services
             section.CourseId = courseId;
             await _context.AddAsync(section, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{courseId}:content", cancellationToken);
 
             var response = new SectionResponse(
                 section.Id,
@@ -109,6 +114,7 @@ namespace LearnHub_Api.Services
             section.Title = request.Title;
             section.Order = request.Order;
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{courseId}:content", cancellationToken);
 
             return Result.Success();
         }
@@ -133,6 +139,7 @@ namespace LearnHub_Api.Services
 
             _context.Remove(section);
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"course:{courseId}:content", cancellationToken);
 
             return Result.Success();
         }

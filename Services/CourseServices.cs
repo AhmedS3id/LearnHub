@@ -60,7 +60,7 @@ namespace LearnHub_Api.Services
                 LocalCacheExpiration = TimeSpan.FromMinutes(1)
             };
 
-            return await _hybridCache.GetOrCreateAsync(
+            var allResults = await _hybridCache.GetOrCreateAsync(
                 cacheKey,
                 async cancellationToken =>
                 {
@@ -80,6 +80,11 @@ namespace LearnHub_Api.Services
                 options,
                 tags: ["courses"],
                 cancellationToken: cancellationToken);
+
+            return allResults
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToList();
         }
 
         public async Task<Result<IEnumerable<CourseResponse>>> GetByCategoryAsync(int categoryId,CancellationToken cancellationToken)

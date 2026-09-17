@@ -39,10 +39,10 @@ namespace LearnHub_Api.Services
             if (alreadyReviewed)
                 return Result.Failure<ReviewResponse>(ReviewErrors.AlreadyReviewed);
 
-            //var studentName = await _context.Users
-            //    .Where(x => x.Id == studentId)
-            //    .Select(x => x.FirstName + " " + x.LastName)
-            //    .FirstAsync(cancellationToken);
+            var studentName = await _context.Users
+                .Where(x => x.Id == studentId)
+                .Select(x => x.FirstName + " " + x.LastName)
+                .FirstAsync(cancellationToken);
 
             var review = request.Adapt<Review>();
             review.CourseId = courseId;
@@ -54,7 +54,7 @@ namespace LearnHub_Api.Services
 
             var response = new ReviewResponse(
                 review.Id,
-                review.Student.FirstName + " " + review.Student.LastName,
+                studentName,
                 course.Title,
                 review.Comment,
                 review.Rating,
